@@ -124,7 +124,11 @@ final class PasscodeKeychain: PasscodeStorage {
             kSecAttrSynchronizable as String: false
         ]
         #if !os(macOS)
-        query[kSecAttrAccessGroup as String] = try account.hasPrefix("biometric.") ? self.environment.privateAccessGroup() : self.environment.sharedAccessGroup()
+        if let accessGroup = try? (account.hasPrefix("biometric.") ? self.environment.privateAccessGroup() : self.environment.sharedAccessGroup()) {
+            if FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: accessGroup) != nil {
+                query[kSecAttrAccessGroup as String] = accessGroup
+            }
+        }
         #endif
         return query
     }

@@ -56,7 +56,7 @@ jobs:
           python3 -u build-system/Make/Make.py \
             --bazelUserRoot="$BAZEL_USER_ROOT" \
             build \
-            --configurationPath="build-system/appstore-configuration.json" \
+            --configurationPath="build-system/sideload-configuration.json" \
             --codesigningInformationPath=build-system/fake-codesigning \
             --configuration=release_arm64 \
             --buildNumber="$BUILD_NUMBER"
@@ -66,6 +66,15 @@ jobs:
           rm -rf "$OUTPUT_PATH"
           mkdir -p "$OUTPUT_PATH"
           cp bazel-bin/Telegram/Telegram.ipa "$OUTPUT_PATH/"
+
+          # create slim sideload variant (no plugins / extensions, no dummy embedded profile)
+          SLIM_DIR="build/slim"
+          rm -rf "$SLIM_DIR"
+          mkdir -p "$SLIM_DIR"
+          unzip -qq "$OUTPUT_PATH/Telegram.ipa" -d "$SLIM_DIR"
+          rm -rf "$SLIM_DIR/Payload/Telegram.app/PlugIns"
+          rm -f "$SLIM_DIR/Payload/Telegram.app/embedded.mobileprovision"
+          (cd "$SLIM_DIR" && zip -qry "$SOURCE_DIR/$OUTPUT_PATH/Telegram-slim.ipa" Payload)
 
           # collect dsym
           mkdir -p build/DSYMs
@@ -96,6 +105,17 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: /Users/Shared/telegram-ios/build/artifacts/Telegram.ipa
           asset_name: Telegram.ipa
+          asset_content_type: application/zip
+
+      - name: Upload Release Slim IPA
+        id: upload-release-slim-ipa 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: /Users/Shared/telegram-ios/build/artifacts/Telegram-slim.ipa
+          asset_name: Telegram-slim.ipa
           asset_content_type: application/zip
 
       - name: Upload Release DSYM
