@@ -82,6 +82,7 @@ final class AuthorizationSequencePaymentScreenComponent: Component {
         private let check = ComponentView<Empty>()
         private let button = ComponentView<Empty>()
         private let helpButton = ComponentView<Empty>()
+        private let cancelButton = ComponentView<Empty>()
                 
         private var isUpdating: Bool = false
         
@@ -281,6 +282,36 @@ final class AuthorizationSequencePaymentScreenComponent: Component {
                     self.addSubview(helpButtonView)
                 }
                 transition.setFrame(view: helpButtonView, frame: helpButtonFrame)
+            }
+            
+            let cancelButtonSize = self.cancelButton.update(
+                transition: transition,
+                component: AnyComponent(
+                    GlassBarButtonComponent(
+                        size: nil,
+                        backgroundColor: nil,
+                        isDark: environment.theme.overallDarkAppearance,
+                        state: .glass,
+                        component: AnyComponentWithIdentity(id: "label", component: AnyComponent(MultilineTextComponent(
+                            text: .plain(NSAttributedString(string: environment.strings.Common_Cancel, font: Font.regular(17.0), textColor: environment.theme.chat.inputPanel.panelControlColor))
+                        ))),
+                        action: { [weak self] _ in
+                            guard let self, let controller = self.environment?.controller() as? ViewController else {
+                                return
+                            }
+                            controller.navigationBar?.backPressed?()
+                        }
+                    )
+                ),
+                environment: {},
+                containerSize: CGSize(width: 200.0, height: 44.0)
+            )
+            let cancelButtonFrame = CGRect(origin: CGPoint(x: 16.0, y: environment.navigationHeight - cancelButtonSize.height - 6.0), size: cancelButtonSize)
+            if let cancelButtonView = self.cancelButton.view {
+                if cancelButtonView.superview == nil {
+                    self.addSubview(cancelButtonView)
+                }
+                transition.setFrame(view: cancelButtonView, frame: cancelButtonFrame)
             }
                         
             let animationSize = self.animation.update(

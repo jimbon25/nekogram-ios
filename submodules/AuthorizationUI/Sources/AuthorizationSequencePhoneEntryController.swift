@@ -94,6 +94,8 @@ public final class AuthorizationSequencePhoneEntryController: ViewController, MF
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "___close", style: .plain, target: self, action: #selector(self.cancelPressed))
         }
         
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "QR Code", style: .plain, target: self, action: #selector(self.openQrLogin))
+        
         if let countriesConfiguration {
             AuthorizationSequenceCountrySelectionController.setupCountryCodes(countries: countriesConfiguration.countries, codesByPrefix: countriesConfiguration.countriesByPrefix)
         }
@@ -112,15 +114,13 @@ public final class AuthorizationSequencePhoneEntryController: ViewController, MF
     }
     
     func updateNavigationItems() {
-        guard let layout = self.validLayout, layout.size.width < 360.0 else {
-            return
-        }
-                
         if self.inProgress {
             let item = UIBarButtonItem(customDisplayNode: ProgressNavigationButtonNode(color: self.presentationData.theme.rootController.navigationBar.accentTextColor))
             self.navigationItem.rightBarButtonItem = item
-        } else {
+        } else if let layout = self.validLayout, layout.size.width < 360.0 {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: self.presentationData.strings.Common_Next, style: .done, target: self, action: #selector(self.nextPressed))
+        } else {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "QR Code", style: .plain, target: self, action: #selector(self.openQrLogin))
         }
     }
     
@@ -188,6 +188,9 @@ public final class AuthorizationSequencePhoneEntryController: ViewController, MF
         }
         self.controllerNode.checkPhone = { [weak self] in
             self?.nextPressed()
+        }
+        self.controllerNode.openQrLogin = { [weak self] in
+            self?.openQrLogin()
         }
         
         if let account = self.account {
@@ -436,5 +439,21 @@ public final class AuthorizationSequencePhoneEntryController: ViewController, MF
     
     public func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
         controller.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func openQrLogin() {
+        guard let account = self.account else {
+            return
+        }
+        self.view.endEditing(true)
+        let qrController = AuthorizationSequenceQrController(sharedContext: self.sharedContext, account: account, presentationData: self.presentationData)
+        qrController.accountUpdated = { [weak self] updatedAccount in
+            guard let strongSelf = self else {
+                return
+            }
+            strongSelf.account = updatedAccount
+            strongSelf.accountUpdated?(updatedAccount)
+        }
+        self.push(qrController)
     }
 }

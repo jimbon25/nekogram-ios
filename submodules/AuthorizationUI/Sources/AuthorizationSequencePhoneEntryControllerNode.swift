@@ -321,6 +321,10 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
     private let contactSyncNode: ContactSyncNode
     private let proceedNode: SolidRoundedButtonNode
     
+    private let qrLoginButtonNode: HighlightableButtonNode
+    private let qrLoginTitleNode: ImmediateTextNode
+    var openQrLogin: (() -> Void)?
+    
     private var qrNode: ASImageNode?
     private let exportTokenDisposable = MetaDisposable()
     private let tokenEventsDisposable = MetaDisposable()
@@ -430,6 +434,16 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
         self.proceedNode.isEnabled = false
         self.proceedNode.accessibilityIdentifier = "Auth.PhoneEntry.ContinueButton"
 
+        self.qrLoginTitleNode = ImmediateTextNode()
+        self.qrLoginTitleNode.displaysAsynchronously = false
+        self.qrLoginTitleNode.attributedText = NSAttributedString(string: "Log in by QR Code", font: Font.regular(17.0), textColor: theme.list.itemAccentColor, paragraphAlignment: .center)
+        
+        self.qrLoginButtonNode = HighlightableButtonNode()
+        self.qrLoginButtonNode.displaysAsynchronously = false
+        self.qrLoginButtonNode.accessibilityLabel = "Log in by QR Code"
+        self.qrLoginButtonNode.accessibilityTraits = [.button]
+        self.qrLoginButtonNode.addSubnode(self.qrLoginTitleNode)
+
         super.init()
         
         self.setViewBlock({
@@ -443,11 +457,14 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
         self.addSubnode(self.titleActivateAreaNode)
         self.addSubnode(self.noticeActivateAreaNode)
         self.addSubnode(self.phoneAndCountryNode)
+        self.addSubnode(self.qrLoginButtonNode)
         self.addSubnode(self.contactSyncNode)
         self.addSubnode(self.proceedNode)
         self.addSubnode(self.animationNode)
         self.addSubnode(self.managedAnimationNode)
         self.contactSyncNode.isHidden = true
+        
+        self.qrLoginButtonNode.addTarget(self, action: #selector(self.qrLoginPressed), forControlEvents: .touchUpInside)
         
         self.noticeNode.highlightAttributeAction = { attributes in
             if let _ = attributes[NSAttributedString.Key(rawValue: "URL")] {
@@ -533,6 +550,7 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
             self.titleNode,
             self.noticeNode,
             self.phoneAndCountryNode,
+            self.qrLoginButtonNode,
             self.contactSyncNode
         ]
 
@@ -562,6 +580,7 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
             self.titleNode,
             self.noticeNode,
             self.phoneAndCountryNode,
+            self.qrLoginButtonNode,
             self.contactSyncNode
         ]
         
@@ -624,10 +643,14 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
         let proceedHeight = self.proceedNode.updateLayout(width: maximumWidth - inset * 2.0, transition: transition)
         let proceedSize = CGSize(width: maximumWidth - inset * 2.0, height: proceedHeight)
         
+        let qrButtonSize = self.qrLoginTitleNode.updateLayout(CGSize(width: maximumWidth, height: CGFloat.greatestFiniteMagnitude))
+        self.qrLoginTitleNode.frame = CGRect(origin: CGPoint(x: floorToScreenPixels((maximumWidth - qrButtonSize.width) / 2.0), y: 0.0), size: qrButtonSize)
+        
         var items: [AuthorizationLayoutItem] = [
             AuthorizationLayoutItem(node: self.titleNode, size: titleSize, spacingBefore: AuthorizationLayoutItemSpacing(weight: titleInset, maxValue: titleInset), spacingAfter: AuthorizationLayoutItemSpacing(weight: 0.0, maxValue: 0.0)),
             AuthorizationLayoutItem(node: self.noticeNode, size: noticeSize, spacingBefore: AuthorizationLayoutItemSpacing(weight: 18.0, maxValue: 18.0), spacingAfter: AuthorizationLayoutItemSpacing(weight: 0.0, maxValue: 0.0)),
             AuthorizationLayoutItem(node: self.phoneAndCountryNode, size: CGSize(width: maximumWidth, height: 115.0), spacingBefore: AuthorizationLayoutItemSpacing(weight: 30.0, maxValue: 30.0), spacingAfter: AuthorizationLayoutItemSpacing(weight: 0.0, maxValue: 0.0)),
+            AuthorizationLayoutItem(node: self.qrLoginButtonNode, size: CGSize(width: maximumWidth, height: qrButtonSize.height), spacingBefore: AuthorizationLayoutItemSpacing(weight: 16.0, maxValue: 16.0), spacingAfter: AuthorizationLayoutItemSpacing(weight: 0.0, maxValue: 0.0)),
         ]
         
         if layout.size.width > 320.0 {
@@ -699,6 +722,10 @@ final class AuthorizationSequencePhoneEntryControllerNode: ASDisplayNode {
                 self.debugAction()
             }
         }
+    }
+    
+    @objc private func qrLoginPressed() {
+        self.openQrLogin?()
     }
     
     @objc private func debugQrTap(_ recognizer: UITapGestureRecognizer) {
