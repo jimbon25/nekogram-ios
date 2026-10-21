@@ -5842,8 +5842,17 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
                 } else if case .tap = gesture {
                     item.controllerInteraction.clickThroughMessage(self.view, location)
                 } else if case .doubleTap = gesture {
-                    if canAddMessageReactions(message: EngineMessage(item.message)) {
-                        item.controllerInteraction.updateMessageReaction(item.message, .default, false, nil)
+                    switch NekoSettings.shared.doubleTapAction {
+                    case .reaction:
+                        if canAddMessageReactions(message: EngineMessage(item.message)) {
+                            item.controllerInteraction.updateMessageReaction(item.message, .default, false, nil)
+                        }
+                    case .reply:
+                        item.controllerInteraction.setupReply(item.message.id)
+                    case .copy:
+                        UIPasteboard.general.string = item.message.text
+                    case .disabled:
+                        break
                     }
                 }
             }

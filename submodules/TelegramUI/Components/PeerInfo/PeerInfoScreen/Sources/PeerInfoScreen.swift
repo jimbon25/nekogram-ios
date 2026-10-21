@@ -191,6 +191,7 @@ enum PeerInfoSettingsSection {
     case stars
     case ton
     case wallet
+    case nekoSettings
 }
 
 enum PeerInfoReportType {

@@ -1294,7 +1294,27 @@ public final class ChatEntityKeyboardInputNode: ChatInputNode {
                         } else {
                             reference = .standalone(media: file)
                         }
-                        let _ = interaction.sendSticker(reference, false, false, nil, false, view, rect, layer, bubbleUpEmojiOrStickersets)
+                        if NekoSettings.shared.confirmSendSticker {
+                            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+                            let actionSheet = ActionSheetController(presentationData: presentationData)
+                            actionSheet.setItemGroups([
+                                ActionSheetItemGroup(items: [
+                                    ActionSheetTextItem(title: "Send this sticker?"),
+                                    ActionSheetButtonItem(title: "Send", color: .accent, action: { [weak interaction, weak actionSheet] in
+                                        actionSheet?.dismissAnimated()
+                                        let _ = interaction?.sendSticker(reference, false, false, nil, false, view, rect, layer, bubbleUpEmojiOrStickersets)
+                                    })
+                                ]),
+                                ActionSheetItemGroup(items: [
+                                    ActionSheetButtonItem(title: presentationData.strings.Common_Cancel, color: .accent, font: .bold, action: { [weak actionSheet] in
+                                        actionSheet?.dismissAnimated()
+                                    })
+                                ])
+                            ])
+                            interaction.presentController(actionSheet, nil)
+                        } else {
+                            let _ = interaction.sendSticker(reference, false, false, nil, false, view, rect, layer, bubbleUpEmojiOrStickersets)
+                        }
                     }
                 })
             },

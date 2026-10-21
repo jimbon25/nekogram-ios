@@ -20,6 +20,9 @@ public extension Peer {
     }
     
     func restrictionText(platform: String, contentSettings: ContentSettings) -> String? {
+        if UserDefaults.standard.bool(forKey: "neko_ignore_content_restrictions") {
+            return nil
+        }
         var restrictionInfo: PeerAccessRestrictionInfo?
         switch self {
         case let user as TelegramUser:

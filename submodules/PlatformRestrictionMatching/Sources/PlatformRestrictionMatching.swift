@@ -18,6 +18,9 @@ public extension EngineRawMessage {
 
 public extension RestrictedContentMessageAttribute {
     func platformText(platform: String, contentSettings: ContentSettings) -> String? {
+        if UserDefaults.standard.bool(forKey: "neko_ignore_content_restrictions") {
+            return nil
+        }
         for rule in self.rules {
             if rule.reason == "sensitive" {
                 continue

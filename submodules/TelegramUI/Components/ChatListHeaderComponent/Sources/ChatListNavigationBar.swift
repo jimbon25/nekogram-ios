@@ -17,6 +17,9 @@ private func searchScrollHeightValue() -> CGFloat {
 }
 
 private func storiesHeightValue() -> CGFloat {
+    if UserDefaults.standard.bool(forKey: "neko_hide_stories") {
+        return 0.0
+    }
     return 96.0
 }
 
