@@ -3643,6 +3643,18 @@ public final class ChatControllerImpl: TelegramBaseController, ChatController, G
                             return
                         }
                         
+                        if NekoSettings.shared.askBeforeCall {
+                            let alert = textAlertController(context: strongSelf.context, title: isVideo ? "Video Call" : "Call", text: "Are you sure you want to call \(peer.displayTitle(strings: strongSelf.presentationData.strings, displayOrder: strongSelf.presentationData.nameDisplayOrder))?", actions: [
+                                TextAlertAction(type: .genericAction, title: "Cancel", action: {}),
+                                TextAlertAction(type: .defaultAction, title: "Call", action: { [weak strongSelf] in
+                                    guard let _ = strongSelf else { return }
+                                    context.requestCall(peerId: peer.id, isVideo: isVideo, completion: {})
+                                })
+                            ])
+                            strongSelf.present(alert, in: .window(.root))
+                            return
+                        }
+                        
                         context.requestCall(peerId: peer.id, isVideo: isVideo, completion: {})
                     })
                 })

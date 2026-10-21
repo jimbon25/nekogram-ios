@@ -32,6 +32,12 @@ public final class NekoSettings {
     public static let doubleTapActionKey = "neko_double_tap_action"
     public static let confirmSendStickerKey = "neko_confirm_send_sticker"
     public static let hideStoriesKey = "neko_hide_stories"
+    public static let noQuoteForwardKey = "neko_no_quote_forward"
+    public static let showIdAndDcKey = "neko_show_id_and_dc"
+    public static let disableJumpToNextChannelKey = "neko_disable_jump_to_next_channel"
+    public static let askBeforeCallKey = "neko_ask_before_calling"
+    public static let confirmSendVoiceKey = "neko_confirm_send_voice"
+    public static let showMessageDetailsKey = "neko_show_message_details"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -94,6 +100,75 @@ public final class NekoSettings {
         }
         set {
             self.defaults.set(newValue, forKey: NekoSettings.hideStoriesKey)
+        }
+    }
+    
+    public var noQuoteForward: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.noQuoteForwardKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.noQuoteForwardKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.noQuoteForwardKey)
+        }
+    }
+    
+    public var showIdAndDc: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.showIdAndDcKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.showIdAndDcKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.showIdAndDcKey)
+        }
+    }
+    
+    public var disableJumpToNextChannel: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.disableJumpToNextChannelKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.disableJumpToNextChannelKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.disableJumpToNextChannelKey)
+        }
+    }
+    
+    public var askBeforeCall: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.askBeforeCallKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.askBeforeCallKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.askBeforeCallKey)
+        }
+    }
+    
+    public var confirmSendVoice: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.confirmSendVoiceKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.confirmSendVoiceKey)
+        }
+    }
+    
+    public var showMessageDetails: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.showMessageDetailsKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.showMessageDetailsKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.showMessageDetailsKey)
         }
     }
 }

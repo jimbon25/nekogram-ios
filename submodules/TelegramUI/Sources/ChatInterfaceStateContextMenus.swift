@@ -1970,6 +1970,38 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
             })))
         }
         
+        if NekoSettings.shared.showMessageDetails, let message = messages.first {
+            actions.append(.action(ContextMenuActionItem(text: "Message Details", icon: { theme in
+                return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.actionSheet.primaryTextColor)
+            }, action: { controller, f in
+                f(.dismissWithoutContent)
+                var details = "Message ID: \(message.id.id)\n"
+                details += "Peer ID: \(message.id.peerId.id._internalGetInt64Value())\n"
+                if let author = message.author {
+                    details += "Sender ID: \(author.id.id._internalGetInt64Value())\n"
+                }
+                let date = Date(timeIntervalSince1970: TimeInterval(message.timestamp))
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                formatter.timeZone = TimeZone.current
+                details += "Date: \(formatter.string(from: date))\n"
+                if let forwardInfo = message.forwardInfo {
+                    if let author = forwardInfo.author {
+                        details += "Forwarded From ID: \(author.id.id._internalGetInt64Value())\n"
+                    }
+                }
+                let alert = textAlertController(context: context, title: "Message Details", text: details, actions: [
+                    TextAlertAction(type: .genericAction, title: "Copy", action: {
+                        UIPasteboard.general.string = details
+                    }),
+                    TextAlertAction(type: .defaultAction, title: "OK", action: {})
+                ])
+                if let chatController = interfaceInteraction?.chatController() {
+                    chatController.present(alert, in: .window(.root))
+                }
+            })))
+        }
+        
         var clearCacheAsDelete = false
         var hasViewStats = false
         if let channel = message.peers[message.id.peerId] as? TelegramChannel, case .broadcast = channel.info, !isMigrated {

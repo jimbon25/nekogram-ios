@@ -269,15 +269,19 @@ extension ChatControllerImpl {
         
         self.chatDisplayNode.overlayTitle = contentData.overlayTitle
         
-        self.chatDisplayNode.historyNode.nextChannelToRead = contentData.state.nextChannelToRead.flatMap { nextChannelToRead -> (peer: EnginePeer, threadData: (id: Int64, data: MessageHistoryThreadData)?, unreadCount: Int, location: TelegramEngine.NextUnreadChannelLocation)? in
-            return (
-                nextChannelToRead.peer,
-                nextChannelToRead.threadData.flatMap { threadData -> (id: Int64, data: MessageHistoryThreadData) in
-                    return (threadData.id, threadData.data)
-                },
-                nextChannelToRead.unreadCount,
-                nextChannelToRead.location
-            )
+        if NekoSettings.shared.disableJumpToNextChannel {
+            self.chatDisplayNode.historyNode.nextChannelToRead = nil
+        } else {
+            self.chatDisplayNode.historyNode.nextChannelToRead = contentData.state.nextChannelToRead.flatMap { nextChannelToRead -> (peer: EnginePeer, threadData: (id: Int64, data: MessageHistoryThreadData)?, unreadCount: Int, location: TelegramEngine.NextUnreadChannelLocation)? in
+                return (
+                    nextChannelToRead.peer,
+                    nextChannelToRead.threadData.flatMap { threadData -> (id: Int64, data: MessageHistoryThreadData) in
+                        return (threadData.id, threadData.data)
+                    },
+                    nextChannelToRead.unreadCount,
+                    nextChannelToRead.location
+                )
+            }
         }
         self.chatDisplayNode.historyNode.nextChannelToReadDisplayName = contentData.state.nextChannelToReadDisplayName
         self.updateNextChannelToReadVisibility()
@@ -2084,7 +2088,8 @@ extension ChatControllerImpl {
                 
                 strongSelf.commitPurposefulAction()
                 let forwardMessageIds = messages.map { $0.id }.sorted()
-                strongSelf.forwardMessages(messageIds: forwardMessageIds)
+                let options: ChatInterfaceForwardOptionsState? = NekoSettings.shared.noQuoteForward ? ChatInterfaceForwardOptionsState(hideNames: true, hideCaptions: false, unhideNamesOnCaptionChange: false) : nil
+                strongSelf.forwardMessages(messageIds: forwardMessageIds, options: options)
             }
         }, updateForwardOptionsState: { [weak self] f in
             if let strongSelf = self {
@@ -2804,6 +2809,23 @@ extension ChatControllerImpl {
             })
         }, finishMediaRecording: { [weak self] action in
             guard let strongSelf = self else {
+                return
+            }
+            if case .send = action, NekoSettings.shared.confirmSendVoice {
+                let isVideo = strongSelf.presentationInterfaceState.interfaceState.mediaRecordingMode == .video
+                let title = isVideo ? "Send Video Message?" : "Send Voice Message?"
+                let alert = textAlertController(context: strongSelf.context, title: title, text: "Are you sure you want to send this message?", actions: [
+                    TextAlertAction(type: .genericAction, title: "Cancel", action: { [weak strongSelf] in
+                        strongSelf?.beginMediaRecordingRequestId += 1
+                        strongSelf?.dismissMediaRecorder(.dismiss)
+                    }),
+                    TextAlertAction(type: .defaultAction, title: "Send", action: { [weak strongSelf] in
+                        guard let strongSelf = strongSelf else { return }
+                        strongSelf.beginMediaRecordingRequestId += 1
+                        strongSelf.dismissMediaRecorder(action)
+                    })
+                ])
+                strongSelf.present(alert, in: .window(.root))
                 return
             }
             strongSelf.beginMediaRecordingRequestId += 1

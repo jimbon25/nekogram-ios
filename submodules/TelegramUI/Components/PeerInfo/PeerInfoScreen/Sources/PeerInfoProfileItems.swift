@@ -16,6 +16,7 @@ import WebUI
 import AvatarNode
 import PeerNameColorItem
 import BoostLevelIconComponent
+import TelegramUIPreferences
 
 private let enabledPublicBioEntities: EnabledEntityTypes = [.allUrl, .mention, .hashtag]
 private let enabledPrivateBioEntities: EnabledEntityTypes = [.internalUrl, .mention, .hashtag]
@@ -217,6 +218,27 @@ func infoItems(
                     }, contextAction: { node, gesture, _ in
                         interaction.openUsernameContextMenu(node, gesture)
                     }, requestLayout: { animated in
+                        interaction.requestLayout(animated)
+                    }
+                )
+            )
+        }
+        
+        if NekoSettings.shared.showIdAndDc {
+            let ItemTelegramId = 3099
+            let idText = "\(user.id.id._internalGetInt64Value())"
+            items[currentPeerInfoSection]!.append(
+                PeerInfoScreenLabeledValueItem(
+                    id: ItemTelegramId,
+                    label: "Telegram ID",
+                    text: idText,
+                    textColor: .accent,
+                    action: { _, _ in
+                        UIPasteboard.general.string = idText
+                    },
+                    longTapAction: nil,
+                    contextAction: nil,
+                    requestLayout: { animated in
                         interaction.requestLayout(animated)
                     }
                 )
@@ -656,6 +678,26 @@ func infoItems(
                         }, iconAction: {
                             interaction.openQrCode()
                         }, requestLayout: { animated in
+                            interaction.requestLayout(animated)
+                        }
+                    )
+                )
+            }
+            if NekoSettings.shared.showIdAndDc {
+                let ItemTelegramId = 999
+                let idText = "\(channel.id.id._internalGetInt64Value())"
+                items[currentPeerInfoSection]!.append(
+                    PeerInfoScreenLabeledValueItem(
+                        id: ItemTelegramId,
+                        label: "Telegram ID",
+                        text: idText,
+                        textColor: .accent,
+                        action: { _, _ in
+                            UIPasteboard.general.string = idText
+                        },
+                        longTapAction: nil,
+                        contextAction: nil,
+                        requestLayout: { animated in
                             interaction.requestLayout(animated)
                         }
                     )

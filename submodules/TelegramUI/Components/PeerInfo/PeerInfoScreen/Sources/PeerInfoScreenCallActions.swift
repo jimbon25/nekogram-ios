@@ -12,6 +12,7 @@ import TelegramPresentationData
 import PresentationDataUtils
 import TelegramCallsUI
 import AvatarNode
+import TelegramUIPreferences
 
 extension PeerInfoScreenNode {
     func requestCall(isVideo: Bool, gesture: ContextGesture? = nil, contextController: ContextControllerProtocol? = nil, result: ((ContextMenuActionResult) -> Void)? = nil, backAction: ((ContextControllerProtocol) -> Void)? = nil) {
@@ -57,6 +58,18 @@ extension PeerInfoScreenNode {
                 canInviteWithPremium: false,
                 premiumRequiredToContact: false
             )], theme: self.presentationData.theme))
+            return
+        }
+        
+        if NekoSettings.shared.askBeforeCall {
+            let alert = textAlertController(context: self.context, title: isVideo ? "Video Call" : "Call", text: "Are you sure you want to call \(peer.displayTitle(strings: self.presentationData.strings, displayOrder: self.presentationData.nameDisplayOrder))?", actions: [
+                TextAlertAction(type: .genericAction, title: "Cancel", action: {}),
+                TextAlertAction(type: .defaultAction, title: "Call", action: { [weak self] in
+                    guard let self = self else { return }
+                    self.context.requestCall(peerId: peer.id, isVideo: isVideo, completion: {})
+                })
+            ])
+            self.controller?.present(alert, in: .window(.root))
             return
         }
         
