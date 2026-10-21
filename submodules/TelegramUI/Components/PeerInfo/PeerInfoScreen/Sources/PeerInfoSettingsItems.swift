@@ -13,6 +13,7 @@ import DeviceAccess
 import TelegramStringFormatting
 import PeerNameColorItem
 import WalletContext
+import TelegramUIPreferences
 
 enum SettingsSection: Int, CaseIterable {
     case edit
