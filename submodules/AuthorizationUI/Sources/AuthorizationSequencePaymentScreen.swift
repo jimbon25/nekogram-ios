@@ -299,7 +299,7 @@ final class AuthorizationSequencePaymentScreenComponent: Component {
                             guard let self, let controller = self.environment?.controller() as? ViewController else {
                                 return
                             }
-                            controller.navigationBar?.backPressed?()
+                            controller.navigationBar?.backPressed()
                         }
                     )
                 ),
