@@ -882,9 +882,17 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
                 }
             }
             if !availableFilters.contains(where: { $0.id == self.selectedId }) {
-                self.switchToFilter(id: .all, completion: {
+                let targetId = availableFilters.first?.id ?? .all
+                if targetId != self.selectedId && self.availableFilters.contains(where: { $0.id == targetId }) {
+                    self.switchToFilter(id: targetId, completion: {
+                        apply()
+                    })
+                } else {
                     apply()
-                })
+                    if let firstId = availableFilters.first?.id {
+                        self.switchToFilter(id: firstId)
+                    }
+                }
             } else {
                 apply()
             }
@@ -1039,6 +1047,8 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
                     return
                 }
             }
+        } else {
+            completion?()
         }
     }
     

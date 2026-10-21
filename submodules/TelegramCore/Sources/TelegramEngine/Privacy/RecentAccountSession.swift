@@ -119,7 +119,8 @@ extension RecentAccountSession {
                 if (flags & (1 << 4)) == 0 {
                     accountSessionFlags.insert(.acceptsIncomingCalls)
                 }
-                self.init(hash: hash, deviceModel: deviceModel, platform: platform, systemVersion: systemVersion, apiId: apiId, appName: appName, appVersion: appVersion, creationDate: dateCreated, activityDate: dateActive, ip: ip, country: country, region: region, flags: accountSessionFlags)
+                let resolvedAppName = hash == 0 ? "Nekogram iOS" : appName
+                self.init(hash: hash, deviceModel: deviceModel, platform: platform, systemVersion: systemVersion, apiId: apiId, appName: resolvedAppName, appVersion: appVersion, creationDate: dateCreated, activityDate: dateActive, ip: ip, country: country, region: region, flags: accountSessionFlags)
         }
     }
 }

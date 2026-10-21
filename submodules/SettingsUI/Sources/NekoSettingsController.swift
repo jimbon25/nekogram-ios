@@ -76,6 +76,7 @@ private final class NekoSettingsControllerArguments {
     let toggleSilenceNonContacts: (Bool) -> Void
     let toggleIgnoreBlockedInGroups: (Bool) -> Void
     let openDoubleTapAction: () -> Void
+    let openUrl: (String) -> Void
     
     init(
         toggleFormatWithSeconds: @escaping (Bool) -> Void,
@@ -97,7 +98,8 @@ private final class NekoSettingsControllerArguments {
         toggleHideAllChatsTab: @escaping (Bool) -> Void,
         toggleSilenceNonContacts: @escaping (Bool) -> Void,
         toggleIgnoreBlockedInGroups: @escaping (Bool) -> Void,
-        openDoubleTapAction: @escaping () -> Void
+        openDoubleTapAction: @escaping () -> Void,
+        openUrl: @escaping (String) -> Void
     ) {
         self.toggleFormatWithSeconds = toggleFormatWithSeconds
         self.toggleHidePhoneNumber = toggleHidePhoneNumber
@@ -119,11 +121,11 @@ private final class NekoSettingsControllerArguments {
         self.toggleSilenceNonContacts = toggleSilenceNonContacts
         self.toggleIgnoreBlockedInGroups = toggleIgnoreBlockedInGroups
         self.openDoubleTapAction = openDoubleTapAction
+        self.openUrl = openUrl
     }
 }
 
 private enum NekoSettingsSection: Int32 {
-    case banner
     case general
     case privacy
     case appearance
@@ -132,8 +134,6 @@ private enum NekoSettingsSection: Int32 {
 }
 
 private enum NekoSettingsControllerEntry: ItemListNodeEntry {
-    case banner
-    
     case generalHeader
     case showIdAndDc(Bool)
     case showIdAndDcFooter
@@ -183,12 +183,14 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case doubleTapActionFooter
     
     case aboutHeader
-    case aboutInfo
+    case aboutVersion(String)
+    case aboutUpstream(String)
+    case aboutSourceCode
+    case aboutInspiration
+    case aboutFooter
     
     var section: ItemListSectionId {
         switch self {
-        case .banner:
-            return NekoSettingsSection.banner.rawValue
         case .generalHeader, .showIdAndDc, .showIdAndDcFooter:
             return NekoSettingsSection.general.rawValue
         case .privacyHeader, .suppressTyping, .suppressTypingFooter, .silenceNonContacts, .silenceNonContactsFooter, .ignoreBlockedInGroups, .ignoreBlockedInGroupsFooter, .hidePhoneNumber, .hidePhoneNumberFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter:
@@ -197,60 +199,63 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             return NekoSettingsSection.appearance.rawValue
         case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter:
             return NekoSettingsSection.chat.rawValue
-        case .aboutHeader, .aboutInfo:
+        case .aboutHeader, .aboutVersion, .aboutUpstream, .aboutSourceCode, .aboutInspiration, .aboutFooter:
             return NekoSettingsSection.about.rawValue
         }
     }
     
     var stableId: Int32 {
         switch self {
-        case .banner: return 0
-        case .generalHeader: return 1
-        case .showIdAndDc: return 2
-        case .showIdAndDcFooter: return 3
-        case .privacyHeader: return 4
-        case .suppressTyping: return 5
-        case .suppressTypingFooter: return 6
-        case .silenceNonContacts: return 7
-        case .silenceNonContactsFooter: return 8
-        case .ignoreBlockedInGroups: return 9
-        case .ignoreBlockedInGroupsFooter: return 10
-        case .hidePhoneNumber: return 11
-        case .hidePhoneNumberFooter: return 12
-        case .askBeforeCall: return 13
-        case .askBeforeCallFooter: return 14
-        case .ignoreRestrictions: return 15
-        case .ignoreRestrictionsFooter: return 16
-        case .appearanceHeader: return 17
-        case .formatWithSeconds: return 18
-        case .formatWithSecondsFooter: return 19
-        case .hideStories: return 20
-        case .hideStoriesFooter: return 21
-        case .hideAllChatsTab: return 22
-        case .hideAllChatsTabFooter: return 23
-        case .disableRounding: return 24
-        case .disableRoundingFooter: return 25
-        case .chatHeader: return 26
-        case .noQuoteForward: return 27
-        case .noQuoteForwardFooter: return 28
-        case .disableJumpToNextChannel: return 29
-        case .disableJumpToNextChannelFooter: return 30
-        case .confirmSendVoice: return 31
-        case .confirmSendVoiceFooter: return 32
-        case .confirmSendSticker: return 33
-        case .confirmSendStickerFooter: return 34
-        case .dismissKeyboardOnScroll: return 35
-        case .dismissKeyboardOnScrollFooter: return 36
-        case .expandRecentStickers: return 37
-        case .expandRecentStickersFooter: return 38
-        case .disableProximitySensor: return 39
-        case .disableProximitySensorFooter: return 40
-        case .showMessageDetails: return 41
-        case .showMessageDetailsFooter: return 42
-        case .doubleTapAction: return 43
-        case .doubleTapActionFooter: return 44
-        case .aboutHeader: return 45
-        case .aboutInfo: return 46
+        case .generalHeader: return 0
+        case .showIdAndDc: return 1
+        case .showIdAndDcFooter: return 2
+        case .privacyHeader: return 3
+        case .suppressTyping: return 4
+        case .suppressTypingFooter: return 5
+        case .silenceNonContacts: return 6
+        case .silenceNonContactsFooter: return 7
+        case .ignoreBlockedInGroups: return 8
+        case .ignoreBlockedInGroupsFooter: return 9
+        case .hidePhoneNumber: return 10
+        case .hidePhoneNumberFooter: return 11
+        case .askBeforeCall: return 12
+        case .askBeforeCallFooter: return 13
+        case .ignoreRestrictions: return 14
+        case .ignoreRestrictionsFooter: return 15
+        case .appearanceHeader: return 16
+        case .formatWithSeconds: return 17
+        case .formatWithSecondsFooter: return 18
+        case .hideStories: return 19
+        case .hideStoriesFooter: return 20
+        case .hideAllChatsTab: return 21
+        case .hideAllChatsTabFooter: return 22
+        case .disableRounding: return 23
+        case .disableRoundingFooter: return 24
+        case .chatHeader: return 25
+        case .noQuoteForward: return 26
+        case .noQuoteForwardFooter: return 27
+        case .disableJumpToNextChannel: return 28
+        case .disableJumpToNextChannelFooter: return 29
+        case .confirmSendVoice: return 30
+        case .confirmSendVoiceFooter: return 31
+        case .confirmSendSticker: return 32
+        case .confirmSendStickerFooter: return 33
+        case .dismissKeyboardOnScroll: return 34
+        case .dismissKeyboardOnScrollFooter: return 35
+        case .expandRecentStickers: return 36
+        case .expandRecentStickersFooter: return 37
+        case .disableProximitySensor: return 38
+        case .disableProximitySensorFooter: return 39
+        case .showMessageDetails: return 40
+        case .showMessageDetailsFooter: return 41
+        case .doubleTapAction: return 42
+        case .doubleTapActionFooter: return 43
+        case .aboutHeader: return 44
+        case .aboutVersion: return 45
+        case .aboutUpstream: return 46
+        case .aboutSourceCode: return 47
+        case .aboutInspiration: return 48
+        case .aboutFooter: return 49
         }
     }
     
@@ -260,8 +265,6 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     
     static func ==(lhs: NekoSettingsControllerEntry, rhs: NekoSettingsControllerEntry) -> Bool {
         switch lhs {
-        case .banner:
-            if case .banner = rhs { return true } else { return false }
         case .generalHeader:
             if case .generalHeader = rhs { return true } else { return false }
         case let .showIdAndDc(value):
@@ -352,8 +355,16 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case .doubleTapActionFooter = rhs { return true } else { return false }
         case .aboutHeader:
             if case .aboutHeader = rhs { return true } else { return false }
-        case .aboutInfo:
-            if case .aboutInfo = rhs { return true } else { return false }
+        case let .aboutVersion(value):
+            if case let .aboutVersion(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case let .aboutUpstream(value):
+            if case let .aboutUpstream(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .aboutSourceCode:
+            if case .aboutSourceCode = rhs { return true } else { return false }
+        case .aboutInspiration:
+            if case .aboutInspiration = rhs { return true } else { return false }
+        case .aboutFooter:
+            if case .aboutFooter = rhs { return true } else { return false }
         }
     }
     
@@ -362,12 +373,6 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         let isId = presentationData.strings.primaryComponent.languageCode == "id"
         
         switch self {
-        case .banner:
-            let bannerText = isId ?
-                "**Nekogram untuk iOS • Build 35318**\nPort tidak resmi terinspirasi dari Nekogram Android.\nDioptimalkan untuk performa, privasi, dan kenyamanan." :
-                "**Nekogram for iOS • Build 35318**\nUnofficial port inspired by Nekogram for Android.\nOptimized for performance, privacy, and convenience."
-            return ItemListTextItem(presentationData: presentationData, text: .markdown(bannerText), sectionId: self.section)
-            
         case .generalHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "UMUM" : "GENERAL", sectionId: self.section)
         case let .showIdAndDc(value):
@@ -502,11 +507,23 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             
         case .aboutHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "TENTANG" : "ABOUT", sectionId: self.section)
-        case .aboutInfo:
-            let aboutText = isId ?
-                "**Nekogram untuk iOS**\nPort tidak resmi terinspirasi dari Nekogram Android.\nDioptimasi untuk performa dan kenyamanan.\nDikembangkan oleh Dayumm & Makima." :
-                "**Nekogram for iOS**\nUnofficial port inspired by Nekogram for Android.\nOptimized for performance and convenience.\nPorted by Dayumm & Makima."
-            return ItemListTextItem(presentationData: presentationData, text: .markdown(aboutText), sectionId: self.section)
+        case let .aboutVersion(version):
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Versi Aplikasi" : "App Version", label: version, sectionId: self.section, style: .blocks, disclosureStyle: .none, action: nil)
+        case let .aboutUpstream(upstream):
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Basis Upstream" : "Upstream Base", label: upstream, sectionId: self.section, style: .blocks, disclosureStyle: .none, action: nil)
+        case .aboutSourceCode:
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Kode Sumber" : "Source Code", label: "GitHub", sectionId: self.section, style: .blocks, disclosureStyle: .arrow, action: {
+                arguments.openUrl("https://github.com/jimbon25/nekogram-ios")
+            })
+        case .aboutInspiration:
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Inspirasi Upstream" : "Upstream Inspiration", label: "Nekogram (Android)", sectionId: self.section, style: .blocks, disclosureStyle: .arrow, action: {
+                arguments.openUrl("https://github.com/Nekogram/Nekogram")
+            })
+        case .aboutFooter:
+            let footerText = isId ?
+                "Port tidak resmi untuk iOS. Dioptimasi untuk privasi, performa, dan kenyamanan. Tidak berafiliasi dengan Telegram FZ-LLC." :
+                "Unofficial port for iOS. Optimized for privacy, performance, and convenience. Not affiliated with Telegram FZ-LLC."
+            return ItemListTextItem(presentationData: presentationData, text: .plain(footerText), sectionId: self.section)
         }
     }
 }
@@ -514,8 +531,6 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
 private func nekoSettingsControllerEntries(presentationData: PresentationData, state: NekoSettingsState) -> [NekoSettingsControllerEntry] {
     var entries: [NekoSettingsControllerEntry] = []
     let isId = presentationData.strings.primaryComponent.languageCode == "id"
-    
-    entries.append(.banner)
     
     entries.append(.generalHeader)
     entries.append(.showIdAndDc(state.showIdAndDc))
@@ -577,8 +592,16 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.doubleTapAction(doubleTapLabel))
     entries.append(.doubleTapActionFooter)
     
+    let appVersion = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "13.0"
+    let buildNumber = (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) ?? ""
+    let versionLabel = buildNumber.isEmpty ? appVersion : "\(appVersion) (\(buildNumber))"
+    
     entries.append(.aboutHeader)
-    entries.append(.aboutInfo)
+    entries.append(.aboutVersion(versionLabel))
+    entries.append(.aboutUpstream("Telegram iOS"))
+    entries.append(.aboutSourceCode)
+    entries.append(.aboutInspiration)
+    entries.append(.aboutFooter)
     
     return entries
 }
@@ -697,6 +720,9 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
                 ])
             ])
             presentControllerImpl?(actionSheet, nil)
+        },
+        openUrl: { url in
+            context.sharedContext.applicationBindings.openUrl(url)
         }
     )
     
