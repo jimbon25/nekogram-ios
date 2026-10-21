@@ -4034,9 +4034,20 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
             let (_, items) = countAndFilterItems
             var filterItems: [ChatListFilterTabEntry] = []
             
+            let hasCustomFilters = items.contains(where: {
+                if case .filter = $0.0 {
+                    return true
+                }
+                return false
+            })
+            let shouldHideAllChats = NekoSettings.shared.hideAllChatsTab && hasCustomFilters
+            
             for (filter, unreadCount, hasUnmutedUnread) in items {
                 switch filter {
                     case .allChats:
+                        if shouldHideAllChats {
+                            continue
+                        }
                         if let isPremium = isPremium, !isPremium && filterItems.count > 0 {
                             filterItems.insert(.all(unreadCount: 0), at: 0)
                         } else {
@@ -4053,7 +4064,8 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
                 resolvedItems = []
             }
             
-            let firstItem = countAndFilterItems.1.first?.0 ?? .allChats
+            let firstFilterItem: ChatListFilter? = shouldHideAllChats ? items.first(where: { if case .filter = $0.0 { return true } else { return false } })?.0 : countAndFilterItems.1.first?.0
+            let firstItem = firstFilterItem ?? .allChats
             let firstItemEntryId: ChatListFilterTabEntryId
             switch firstItem {
                 case .allChats:
@@ -4078,10 +4090,10 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
                         }
                     }
                     if !found {
-                        selectedEntryId = .all
+                        selectedEntryId = resolvedItems.first?.id ?? .all
                     }
                 } else {
-                    selectedEntryId = .all
+                    selectedEntryId = resolvedItems.first?.id ?? .all
                 }
             }
             let filtersLimit = isPremium == false ? limits.maxFoldersCount : nil

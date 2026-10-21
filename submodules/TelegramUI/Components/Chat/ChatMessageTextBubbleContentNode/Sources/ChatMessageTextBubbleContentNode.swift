@@ -452,6 +452,17 @@ public class ChatMessageTextBubbleContentNode: ChatMessageBubbleContentNode {
                     }
                 }
                 
+                if UserDefaults.standard.bool(forKey: "neko_ignore_blocked_in_groups"), let author = item.message.author, item.message.id.peerId != author.id {
+                    if let blockedNumbers = UserDefaults.standard.array(forKey: "neko_blocked_peer_ids") as? [NSNumber], blockedNumbers.contains(NSNumber(value: author.id.toInt64())) {
+                        let textLength = (rawText as NSString).length
+                        if textLength > 0 {
+                            var entities = messageEntities ?? []
+                            entities.append(MessageTextEntity(range: 0 ..< textLength, type: .Spoiler))
+                            messageEntities = entities
+                        }
+                    }
+                }
+                
                 var formattedDateUpdatePeriod: Int32?
                 if let messageEntities {
                     for entity in messageEntities {

@@ -363,9 +363,12 @@ final class AuthorizedApplicationContext {
                     }
                     
                     if let appLockContext = strongSelf.context.sharedContext.appLockContext as? AppLockContextImpl {
-                        let _ = (appLockContext.isCurrentlyLocked
+                        let _ = (combineLatest(queue: .mainQueue(),
+                            appLockContext.isCurrentlyLocked,
+                            strongSelf.context.engine.data.get(TelegramEngine.EngineData.Item.Peer.IsContact(id: firstMessage.id.peerId))
+                        )
                         |> take(1)
-                        |> deliverOnMainQueue).start(next: { locked in
+                        |> deliverOnMainQueue).start(next: { [weak self] locked, isContact in
                             guard let strongSelf = self else {
                                 return
                             }
@@ -373,13 +376,16 @@ final class AuthorizedApplicationContext {
                             guard !locked else {
                                 return
                             }
-                            let isMuted = firstMessage.attributes.contains(where: { attribute in
+                            var isMuted = firstMessage.attributes.contains(where: { attribute in
                                 if let attribute = attribute as? NotificationInfoMessageAttribute {
                                     return attribute.flags.contains(.muted)
                                 } else {
                                     return false
                                 }
                             })
+                            if NekoSettings.shared.silenceNonContacts && firstMessage.id.peerId.namespace == Namespaces.Peer.CloudUser && !isContact {
+                                isMuted = true
+                            }
                             if !isMuted {
                                 if firstMessage.id.peerId == context.account.peerId, !firstMessage.flags.contains(.WasScheduled) {
                                 } else {

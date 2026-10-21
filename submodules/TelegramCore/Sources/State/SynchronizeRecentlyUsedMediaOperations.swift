@@ -40,7 +40,8 @@ func addSynchronizeRecentlyUsedMediaOperation(transaction: Transaction, category
 func addRecentlyUsedSticker(transaction: Transaction, fileReference: FileMediaReference) {
     if let resource = fileReference.media.resource as? CloudDocumentMediaResource {
         if let entry = CodableEntry(RecentMediaItem(fileReference.media)) {
-            transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(fileReference.media.fileId).rawValue, contents: entry), removeTailIfCountExceeds: 20)
+            let stickerLimit = (UserDefaults.standard.object(forKey: "neko_expand_recent_stickers") == nil || UserDefaults.standard.bool(forKey: "neko_expand_recent_stickers")) ? 100 : 20
+            transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(fileReference.media.fileId).rawValue, contents: entry), removeTailIfCountExceeds: stickerLimit)
         }
         addSynchronizeRecentlyUsedMediaOperation(transaction: transaction, category: .stickers, operation: .add(id: resource.fileId, accessHash: resource.accessHash, fileReference: fileReference))
     }

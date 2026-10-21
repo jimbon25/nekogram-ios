@@ -467,7 +467,8 @@ func applyUpdateMessage(postbox: Postbox, stateManager: AccountStateManager, mes
         }
         for file in sentStickers {
             if let entry = CodableEntry(RecentMediaItem(file)) {
-                transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(file.fileId).rawValue, contents: entry), removeTailIfCountExceeds: 20)
+                let stickerLimit = (UserDefaults.standard.object(forKey: "neko_expand_recent_stickers") == nil || UserDefaults.standard.bool(forKey: "neko_expand_recent_stickers")) ? 100 : 20
+                transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(file.fileId).rawValue, contents: entry), removeTailIfCountExceeds: stickerLimit)
             }
         }
         for file in sentGifs {
@@ -666,7 +667,8 @@ func applyUpdateGroupMessages(postbox: Postbox, stateManager: AccountStateManage
         
         for file in sentStickers {
             if let entry = CodableEntry(RecentMediaItem(file)) {
-                transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(file.fileId).rawValue, contents: entry), removeTailIfCountExceeds: 20)
+                let stickerLimit = (UserDefaults.standard.object(forKey: "neko_expand_recent_stickers") == nil || UserDefaults.standard.bool(forKey: "neko_expand_recent_stickers")) ? 100 : 20
+                transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(file.fileId).rawValue, contents: entry), removeTailIfCountExceeds: stickerLimit)
             }
         }
         for file in sentGifs {

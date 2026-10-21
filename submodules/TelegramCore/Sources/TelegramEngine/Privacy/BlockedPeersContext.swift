@@ -91,14 +91,26 @@ public final class BlockedPeersContext {
                         updatePeers(transaction: transaction, accountPeerId: accountPeerId, peers: parsedPeers)
                             
                         var renderedPeers: [RenderedPeer] = []
+                        var blockedIds: [NSNumber] = []
                         for blockedPeer in blocked {
                             switch blockedPeer {
                             case let .peerBlocked(peerBlockedData):
                                 let peerId = peerBlockedData.peerId
+                                blockedIds.append(NSNumber(value: peerId.peerId.toInt64()))
                                 if let peer = transaction.getPeer(peerId.peerId) {
                                     renderedPeers.append(RenderedPeer(peer: peer))
                                 }
                             }
+                        }
+                        if !blockedIds.isEmpty {
+                            let defaults = UserDefaults.standard
+                            var list = (defaults.array(forKey: "neko_blocked_peer_ids") as? [NSNumber]) ?? []
+                            for bid in blockedIds {
+                                if !list.contains(bid) {
+                                    list.append(bid)
+                                }
+                            }
+                            defaults.set(list, forKey: "neko_blocked_peer_ids")
                         }
 
                         return (renderedPeers, false, nil)
@@ -108,14 +120,26 @@ public final class BlockedPeersContext {
                         updatePeers(transaction: transaction, accountPeerId: accountPeerId, peers: parsedPeers)
                         
                         var renderedPeers: [RenderedPeer] = []
+                        var blockedIds: [NSNumber] = []
                         for blockedPeer in blocked {
                             switch blockedPeer {
                             case let .peerBlocked(peerBlockedData):
                                 let peerId = peerBlockedData.peerId
+                                blockedIds.append(NSNumber(value: peerId.peerId.toInt64()))
                                 if let peer = transaction.getPeer(peerId.peerId) {
                                     renderedPeers.append(RenderedPeer(peer: peer))
                                 }
                             }
+                        }
+                        if !blockedIds.isEmpty {
+                            let defaults = UserDefaults.standard
+                            var list = (defaults.array(forKey: "neko_blocked_peer_ids") as? [NSNumber]) ?? []
+                            for bid in blockedIds {
+                                if !list.contains(bid) {
+                                    list.append(bid)
+                                }
+                            }
+                            defaults.set(list, forKey: "neko_blocked_peer_ids")
                         }
 
                         return (renderedPeers, true, Int(count))

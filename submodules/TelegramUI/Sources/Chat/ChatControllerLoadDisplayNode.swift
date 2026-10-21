@@ -5682,6 +5682,9 @@ extension ChatControllerImpl {
             guard let self else {
                 return
             }
+            if NekoSettings.shared.dismissKeyboardOnScroll {
+                self.chatDisplayNode.dismissInput()
+            }
             if self.presentationInterfaceState.search != nil && self.presentationInterfaceState.historyFilter != nil {
                 self.chatDisplayNode.historyNode.addAfterTransactionsCompleted { [weak self] in
                     guard let self else {

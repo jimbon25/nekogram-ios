@@ -6045,7 +6045,8 @@ func replayFinalState(
         }).map({ $0.1 })
         for file in stickerFiles {
             if let entry = CodableEntry(RecentMediaItem(file)) {
-                transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(file.fileId).rawValue, contents: entry), removeTailIfCountExceeds: 20)
+                let stickerLimit = (UserDefaults.standard.object(forKey: "neko_expand_recent_stickers") == nil || UserDefaults.standard.bool(forKey: "neko_expand_recent_stickers")) ? 100 : 20
+                transaction.addOrMoveToFirstPositionOrderedItemListItem(collectionId: Namespaces.OrderedItemList.CloudRecentStickers, item: OrderedItemListEntry(id: RecentMediaItemId(file.fileId).rawValue, contents: entry), removeTailIfCountExceeds: stickerLimit)
             }
         }
     }

@@ -21,6 +21,18 @@ func _internal_requestUpdatePeerIsBlocked(account: Account, peerId: PeerId, isBl
                 |> mapToSignal { result -> Signal<Void, NoError> in
                     return account.postbox.transaction { transaction -> Void in
                         if result != nil {
+                            let defaults = UserDefaults.standard
+                            var list = (defaults.array(forKey: "neko_blocked_peer_ids") as? [NSNumber]) ?? []
+                            let idVal = NSNumber(value: peerId.toInt64())
+                            if isBlocked {
+                                if !list.contains(idVal) {
+                                    list.append(idVal)
+                                }
+                            } else {
+                                list.removeAll(where: { $0 == idVal })
+                            }
+                            defaults.set(list, forKey: "neko_blocked_peer_ids")
+                            
                             transaction.updatePeerCachedData(peerIds: Set([peerId]), update: { _, current in
                                 let previous: CachedUserData
                                 if let current = current as? CachedUserData {

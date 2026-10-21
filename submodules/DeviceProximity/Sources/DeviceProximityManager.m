@@ -35,6 +35,10 @@
         __weak DeviceProximityManager *weakSelf = self;
         [[NSNotificationCenter defaultCenter] addObserverForName:UIDeviceProximityStateDidChangeNotification object:[UIDevice currentDevice] queue:[NSOperationQueue mainQueue] usingBlock:^(__unused NSNotification *notification)
          {
+             if ([[NSUserDefaults standardUserDefaults] boolForKey:@"neko_disable_proximity_sensor"]) {
+                 [UIDevice currentDevice].proximityMonitoringEnabled = false;
+                 return;
+             }
              __strong DeviceProximityManager *strongSelf = weakSelf;
              if (strongSelf != nil) {
                  bool proximityState = [UIDevice currentDevice].proximityState;
@@ -85,6 +89,10 @@
 }
 
 - (void)updateState:(bool)hasSubscribers globallyEnabled:(bool)globallyEnabled {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"neko_disable_proximity_sensor"]) {
+        hasSubscribers = false;
+        globallyEnabled = false;
+    }
     if (hasSubscribers && globallyEnabled) {
         [UIDevice currentDevice].proximityMonitoringEnabled = true;
         bool deviceProximityState = [UIDevice currentDevice].proximityState;

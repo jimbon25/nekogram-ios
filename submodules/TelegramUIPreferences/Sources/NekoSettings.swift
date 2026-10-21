@@ -39,6 +39,13 @@ public final class NekoSettings {
     public static let confirmSendVoiceKey = "neko_confirm_send_voice"
     public static let showMessageDetailsKey = "neko_show_message_details"
     public static let suppressTypingKey = "neko_suppress_typing"
+    public static let disableProximitySensorKey = "neko_disable_proximity_sensor"
+    public static let expandRecentStickersKey = "neko_expand_recent_stickers"
+    public static let dismissKeyboardOnScrollKey = "neko_dismiss_keyboard_on_scroll"
+    public static let hideAllChatsTabKey = "neko_hide_all_chats_tab"
+    public static let silenceNonContactsKey = "neko_silence_non_contacts"
+    public static let ignoreBlockedInGroupsKey = "neko_ignore_blocked_in_groups"
+    public static let blockedPeerIdsKey = "neko_blocked_peer_ids"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -180,5 +187,94 @@ public final class NekoSettings {
         set {
             self.defaults.set(newValue, forKey: NekoSettings.suppressTypingKey)
         }
+    }
+    
+    public var disableProximitySensor: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.disableProximitySensorKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.disableProximitySensorKey)
+        }
+    }
+    
+    public var expandRecentStickers: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.expandRecentStickersKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.expandRecentStickersKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.expandRecentStickersKey)
+        }
+    }
+    
+    public var dismissKeyboardOnScroll: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.dismissKeyboardOnScrollKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.dismissKeyboardOnScrollKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.dismissKeyboardOnScrollKey)
+        }
+    }
+    
+    public var hideAllChatsTab: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.hideAllChatsTabKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.hideAllChatsTabKey)
+        }
+    }
+    
+    public var silenceNonContacts: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.silenceNonContactsKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.silenceNonContactsKey)
+        }
+    }
+    
+    public var ignoreBlockedInGroups: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.ignoreBlockedInGroupsKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.ignoreBlockedInGroupsKey)
+        }
+    }
+    
+    public var blockedPeerIds: Set<Int64> {
+        get {
+            if let array = self.defaults.array(forKey: NekoSettings.blockedPeerIdsKey) as? [NSNumber] {
+                return Set(array.map { $0.int64Value })
+            }
+            return []
+        }
+        set {
+            let numbers = newValue.map { NSNumber(value: $0) }
+            self.defaults.set(numbers, forKey: NekoSettings.blockedPeerIdsKey)
+        }
+    }
+    
+    public func isPeerBlocked(_ id: Int64) -> Bool {
+        return self.blockedPeerIds.contains(id)
+    }
+    
+    public func addBlockedPeerId(_ id: Int64) {
+        var current = self.blockedPeerIds
+        current.insert(id)
+        self.blockedPeerIds = current
+    }
+    
+    public func removeBlockedPeerId(_ id: Int64) {
+        var current = self.blockedPeerIds
+        current.remove(id)
+        self.blockedPeerIds = current
     }
 }
