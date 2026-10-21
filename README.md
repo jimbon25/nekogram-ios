@@ -1,3 +1,15 @@
+# Nekogram for iOS (Unofficial Port)
+
+An unofficial, modified client of Telegram for iOS inspired by Nekogram for Android.
+
+### Disclaimer and Attribution
+
+- **Not Affiliated:** This repository is an independent community port and is not affiliated with, maintained by, or endorsed by the official Nekogram team or Telegram FZ-LLC.
+- **Credit and Attribution:** Feature concepts and branding motifs are inspired by the [Nekogram project](https://nekogram.app) ([Nekogram on GitHub](https://github.com/Nekogram/Nekogram)). Full credit goes to the upstream authors for their work.
+- **Telegram TOS Compliance:** This client adheres to the [Telegram API Terms of Service](https://core.telegram.org/api/terms) (Section 1.4 & 1.5) by using distinct branding and custom visual assets.
+
+---
+
 # Telegram iOS Source Code Compilation Guide
 
 We welcome all developers to use our API and source code to create applications on our platform.
