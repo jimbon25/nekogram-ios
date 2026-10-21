@@ -23,6 +23,7 @@ private struct NekoSettingsState: Equatable {
     var askBeforeCall: Bool
     var confirmSendVoice: Bool
     var showMessageDetails: Bool
+    var suppressTyping: Bool
     
     init() {
         self.formatTimeWithSeconds = NekoSettings.shared.formatTimeWithSeconds
@@ -38,6 +39,7 @@ private struct NekoSettingsState: Equatable {
         self.askBeforeCall = NekoSettings.shared.askBeforeCall
         self.confirmSendVoice = NekoSettings.shared.confirmSendVoice
         self.showMessageDetails = NekoSettings.shared.showMessageDetails
+        self.suppressTyping = NekoSettings.shared.suppressTyping
     }
 }
 
@@ -54,6 +56,7 @@ private final class NekoSettingsControllerArguments {
     let toggleAskBeforeCall: (Bool) -> Void
     let toggleConfirmSendVoice: (Bool) -> Void
     let toggleShowMessageDetails: (Bool) -> Void
+    let toggleSuppressTyping: (Bool) -> Void
     let openDoubleTapAction: () -> Void
     
     init(
@@ -69,6 +72,7 @@ private final class NekoSettingsControllerArguments {
         toggleAskBeforeCall: @escaping (Bool) -> Void,
         toggleConfirmSendVoice: @escaping (Bool) -> Void,
         toggleShowMessageDetails: @escaping (Bool) -> Void,
+        toggleSuppressTyping: @escaping (Bool) -> Void,
         openDoubleTapAction: @escaping () -> Void
     ) {
         self.toggleFormatWithSeconds = toggleFormatWithSeconds
@@ -83,6 +87,7 @@ private final class NekoSettingsControllerArguments {
         self.toggleAskBeforeCall = toggleAskBeforeCall
         self.toggleConfirmSendVoice = toggleConfirmSendVoice
         self.toggleShowMessageDetails = toggleShowMessageDetails
+        self.toggleSuppressTyping = toggleSuppressTyping
         self.openDoubleTapAction = openDoubleTapAction
     }
 }
@@ -106,6 +111,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case ignoreRestrictionsFooter
     case disableRounding(Bool)
     case disableRoundingFooter
+    case suppressTyping(Bool)
+    case suppressTypingFooter
     
     case appearanceHeader
     case formatWithSeconds(Bool)
@@ -132,7 +139,7 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     
     var section: ItemListSectionId {
         switch self {
-        case .generalHeader, .hidePhoneNumber, .hidePhoneNumberFooter, .showIdAndDc, .showIdAndDcFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter, .disableRounding, .disableRoundingFooter:
+        case .generalHeader, .hidePhoneNumber, .hidePhoneNumberFooter, .showIdAndDc, .showIdAndDcFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter, .disableRounding, .disableRoundingFooter, .suppressTyping, .suppressTypingFooter:
             return NekoSettingsSection.general.rawValue
         case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter:
             return NekoSettingsSection.appearance.rawValue
@@ -156,26 +163,28 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .ignoreRestrictionsFooter: return 8
         case .disableRounding: return 9
         case .disableRoundingFooter: return 10
-        case .appearanceHeader: return 11
-        case .formatWithSeconds: return 12
-        case .formatWithSecondsFooter: return 13
-        case .hideStories: return 14
-        case .hideStoriesFooter: return 15
-        case .chatHeader: return 16
-        case .noQuoteForward: return 17
-        case .noQuoteForwardFooter: return 18
-        case .disableJumpToNextChannel: return 19
-        case .disableJumpToNextChannelFooter: return 20
-        case .confirmSendVoice: return 21
-        case .confirmSendVoiceFooter: return 22
-        case .showMessageDetails: return 23
-        case .showMessageDetailsFooter: return 24
-        case .doubleTapAction: return 25
-        case .doubleTapActionFooter: return 26
-        case .confirmSendSticker: return 27
-        case .confirmSendStickerFooter: return 28
-        case .aboutHeader: return 29
-        case .aboutInfo: return 30
+        case .suppressTyping: return 11
+        case .suppressTypingFooter: return 12
+        case .appearanceHeader: return 13
+        case .formatWithSeconds: return 14
+        case .formatWithSecondsFooter: return 15
+        case .hideStories: return 16
+        case .hideStoriesFooter: return 17
+        case .chatHeader: return 18
+        case .noQuoteForward: return 19
+        case .noQuoteForwardFooter: return 20
+        case .disableJumpToNextChannel: return 21
+        case .disableJumpToNextChannelFooter: return 22
+        case .confirmSendVoice: return 23
+        case .confirmSendVoiceFooter: return 24
+        case .showMessageDetails: return 25
+        case .showMessageDetailsFooter: return 26
+        case .doubleTapAction: return 27
+        case .doubleTapActionFooter: return 28
+        case .confirmSendSticker: return 29
+        case .confirmSendStickerFooter: return 30
+        case .aboutHeader: return 31
+        case .aboutInfo: return 32
         }
     }
     
@@ -207,6 +216,10 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .disableRounding(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .disableRoundingFooter:
             if case .disableRoundingFooter = rhs { return true } else { return false }
+        case let .suppressTyping(value):
+            if case let .suppressTyping(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .suppressTypingFooter:
+            if case .suppressTypingFooter = rhs { return true } else { return false }
         case .appearanceHeader:
             if case .appearanceHeader = rhs { return true } else { return false }
         case let .formatWithSeconds(value):
@@ -285,6 +298,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .disableRoundingFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain("Show exact numbers for views and member counts (e.g. 4777 instead of 4.8K)."), sectionId: self.section)
+        case let .suppressTyping(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: "Ghost Typing", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleSuppressTyping(value)
+            })
+        case .suppressTypingFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain("Suppress typing and recording status so others cannot see when you type or record."), sectionId: self.section)
         case .appearanceHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: "APPEARANCE", sectionId: self.section)
         case let .formatWithSeconds(value):
@@ -359,6 +378,8 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.ignoreRestrictionsFooter)
     entries.append(.disableRounding(state.disableNumberRounding))
     entries.append(.disableRoundingFooter)
+    entries.append(.suppressTyping(state.suppressTyping))
+    entries.append(.suppressTypingFooter)
     
     entries.append(.appearanceHeader)
     entries.append(.formatWithSeconds(state.formatTimeWithSeconds))
@@ -438,6 +459,10 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
         },
         toggleShowMessageDetails: { value in
             NekoSettings.shared.showMessageDetails = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleSuppressTyping: { value in
+            NekoSettings.shared.suppressTyping = value
             statePromise.set(NekoSettingsState())
         },
         openDoubleTapAction: {

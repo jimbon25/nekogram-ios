@@ -38,6 +38,7 @@ public final class NekoSettings {
     public static let askBeforeCallKey = "neko_ask_before_calling"
     public static let confirmSendVoiceKey = "neko_confirm_send_voice"
     public static let showMessageDetailsKey = "neko_show_message_details"
+    public static let suppressTypingKey = "neko_suppress_typing"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -169,6 +170,15 @@ public final class NekoSettings {
         }
         set {
             self.defaults.set(newValue, forKey: NekoSettings.showMessageDetailsKey)
+        }
+    }
+    
+    public var suppressTyping: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.suppressTypingKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.suppressTypingKey)
         }
     }
 }

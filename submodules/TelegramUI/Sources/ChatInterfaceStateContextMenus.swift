@@ -1953,6 +1953,24 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                     interfaceInteraction.forwardMessages(selectAll || isImage ? messages : [message])
                     f(.dismissWithoutContent)
                 })))
+                
+                if message.id.peerId != context.account.peerId {
+                    actions.append(.action(ContextMenuActionItem(text: "Save to Saved Messages", icon: { theme in
+                        return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Save"), color: theme.actionSheet.primaryTextColor)
+                    }, action: { _, f in
+                        f(.dismissWithoutContent)
+                        let targetMessages = selectAll || isImage ? messages : [message]
+                        let forwardMessages: [EnqueueMessage] = targetMessages.map { msg in
+                            return .forward(source: msg.id, threadId: nil, grouping: .auto, attributes: [], correlationId: nil)
+                        }
+                        let _ = enqueueMessages(account: context.account, peerId: context.account.peerId, messages: forwardMessages).startStandalone()
+                        if let chatController = interfaceInteraction.chatController() {
+                            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+                            let text = targetMessages.count == 1 ? presentationData.strings.Conversation_ForwardTooltip_SavedMessages_One : presentationData.strings.Conversation_ForwardTooltip_SavedMessages_Many
+                            chatController.present(UndoOverlayController(presentationData: presentationData, content: .forward(savedMessages: true, text: text), elevatedLayout: false, position: .top, animateInAsReplacement: true, action: { _ in return false }), in: .window(.root))
+                        }
+                    })))
+                }
             }
         }
         
