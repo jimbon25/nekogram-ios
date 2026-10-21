@@ -5833,7 +5833,20 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
                     case let .optionalAction(f):
                         f()
                     case let .openContextMenu(openContextMenu):
-                        if canAddMessageReactions(message: EngineMessage(openContextMenu.tapMessage)) {
+                        if case .doubleTap = gesture {
+                            switch NekoSettings.shared.doubleTapAction {
+                            case .reaction:
+                                if canAddMessageReactions(message: EngineMessage(openContextMenu.tapMessage)) {
+                                    item.controllerInteraction.updateMessageReaction(openContextMenu.tapMessage, .default, false, nil)
+                                }
+                            case .reply:
+                                item.controllerInteraction.setupReply(openContextMenu.tapMessage.id)
+                            case .copy:
+                                UIPasteboard.general.string = openContextMenu.tapMessage.text
+                            case .disabled:
+                                break
+                            }
+                        } else if canAddMessageReactions(message: EngineMessage(openContextMenu.tapMessage)) {
                             item.controllerInteraction.updateMessageReaction(openContextMenu.tapMessage, .default, false, nil)
                         } else {
                             item.controllerInteraction.openMessageContextMenu(openContextMenu.tapMessage, openContextMenu.selectAll, self, openContextMenu.subFrame, nil, nil)

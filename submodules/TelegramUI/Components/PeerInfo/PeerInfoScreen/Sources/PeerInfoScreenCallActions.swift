@@ -62,7 +62,7 @@ extension PeerInfoScreenNode {
         }
         
         if NekoSettings.shared.askBeforeCall {
-            let alert = textAlertController(context: self.context, title: isVideo ? "Video Call" : "Call", text: "Are you sure you want to call \(peer.displayTitle(strings: self.presentationData.strings, displayOrder: self.presentationData.nameDisplayOrder))?", actions: [
+            let alert = textAlertController(context: self.context, title: isVideo ? "Video Call" : "Call", text: "Are you sure you want to call \(EnginePeer(peer).displayTitle(strings: self.presentationData.strings, displayOrder: self.presentationData.nameDisplayOrder))?", actions: [
                 TextAlertAction(type: .genericAction, title: "Cancel", action: {}),
                 TextAlertAction(type: .defaultAction, title: "Call", action: { [weak self] in
                     guard let self = self else { return }

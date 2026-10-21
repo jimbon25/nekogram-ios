@@ -548,6 +548,9 @@ public extension Message {
     }
     
     func isSensitiveContent(platform: String) -> Bool {
+        if UserDefaults.standard.bool(forKey: "neko_ignore_content_restrictions") {
+            return false
+        }
         if let rule = self.restrictedContentAttribute?.rules.first(where: { $0.reason == "sensitive" }) {
             if rule.platform == "all" || rule.platform == platform {
                 return true
