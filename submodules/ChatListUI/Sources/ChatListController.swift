@@ -4103,9 +4103,6 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
             for item in items {
                 switch item.0 {
                     case .allChats:
-                        if shouldHideAllChats {
-                            continue
-                        }
                         hasAllChats = true
                         if let isPremium = isPremium, !isPremium && availableFilters.count > 0 {
                             availableFilters.insert(.all, at: 0)
@@ -4116,7 +4113,7 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
                         availableFilters.append(.filter(item.0))
                 }
             }
-            if !hasAllChats && !shouldHideAllChats {
+            if !hasAllChats {
                 availableFilters.insert(.all, at: 0)
             }
             strongSelf.chatListDisplayNode.mainContainerNode.updateAvailableFilters(availableFilters, limit: filtersLimit)
@@ -4134,8 +4131,6 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
                     strongSelf.mainReady.set(strongSelf.chatListDisplayNode.mainContainerNode.currentItemNode.ready)
                 }
                 strongSelf.initializedFilters = true
-            } else if resetCurrentEntry {
-                strongSelf.chatListDisplayNode.mainContainerNode.switchToFilter(id: selectedEntryId, animated: true)
             }
             
             let animated = strongSelf.didSetupTabs

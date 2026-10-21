@@ -561,14 +561,18 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
             if !self.currentItemNode.isNavigationInAFinalState {
                 return []
             }
+            let minFilterIndex = (NekoSettings.shared.hideAllChatsTab && self.availableFilters.count > 1) ? 1 : 0
             if self.currentItemNode.isDragging || self.currentItemNode.isDeceleratingAfterTracking {
                 if self.availableFilters.count <= 1 {
                     return []
-                } else if self.availableFilters.first?.id == self.selectedId {
+                } else if (self.availableFilters.indices.contains(minFilterIndex) ? self.availableFilters[minFilterIndex].id : self.availableFilters.first?.id) == self.selectedId {
                     return [.leftCenter]
                 }
             }
             if self.availableFilters.count > 1 {
+                if minFilterIndex > 0 && self.availableFilters.indices.contains(minFilterIndex) && self.availableFilters[minFilterIndex].id == self.selectedId {
+                    return [.leftCenter]
+                }
                 return [.leftCenter, .rightCenter]
             } else {
                 return [.rightEdge]
@@ -692,7 +696,8 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
                         return
                     }
                 } else {
-                    if selectedIndex <= 0 && translation.x > 0.0 {
+                    let minFilterIndex = (NekoSettings.shared.hideAllChatsTab && self.availableFilters.count > 1) ? 1 : 0
+                    if selectedIndex <= minFilterIndex && translation.x > 0.0 {
                         let overscroll = translation.x
                         transitionFraction = rubberBandingOffset(offset: overscroll, bandingStart: 0.0) / layout.size.width
                     }
@@ -770,11 +775,12 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
                 var applyNodeAsCurrent: ChatListFilterTabEntryId?
                 
                 if let directionIsToRight = directionIsToRight {
+                    let minFilterIndex = (NekoSettings.shared.hideAllChatsTab && self.availableFilters.count > 1) ? 1 : 0
                     var updatedIndex = selectedIndex
                     if directionIsToRight {
                         updatedIndex = min(updatedIndex + 1, maxFilterIndex)
                     } else {
-                        updatedIndex = max(updatedIndex - 1, 0)
+                        updatedIndex = max(updatedIndex - 1, minFilterIndex)
                     }
                     let switchToId = self.availableFilters[updatedIndex].id
                     if switchToId != self.selectedId, let itemNode = self.itemNodes[switchToId] {
@@ -882,17 +888,9 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
                 }
             }
             if !availableFilters.contains(where: { $0.id == self.selectedId }) {
-                let targetId = availableFilters.first?.id ?? .all
-                if targetId != self.selectedId && self.availableFilters.contains(where: { $0.id == targetId }) {
-                    self.switchToFilter(id: targetId, completion: {
-                        apply()
-                    })
-                } else {
+                self.switchToFilter(id: .all, completion: {
                     apply()
-                    if let firstId = availableFilters.first?.id {
-                        self.switchToFilter(id: firstId)
-                    }
-                }
+                })
             } else {
                 apply()
             }
@@ -1047,8 +1045,6 @@ public final class ChatListContainerNode: ASDisplayNode, ASGestureRecognizerDele
                     return
                 }
             }
-        } else {
-            completion?()
         }
     }
     
