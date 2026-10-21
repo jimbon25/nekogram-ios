@@ -1996,7 +1996,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                     }),
                     TextAlertAction(type: .defaultAction, title: "OK", action: {})
                 ])
-                if let chatController = interfaceInteraction?.chatController() {
+                if let chatController = interfaceInteraction.chatController() {
                     chatController.present(alert, in: .window(.root))
                 }
             })))
