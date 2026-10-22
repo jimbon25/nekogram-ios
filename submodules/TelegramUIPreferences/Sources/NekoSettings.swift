@@ -46,6 +46,10 @@ public final class NekoSettings {
     public static let silenceNonContactsKey = "neko_silence_non_contacts"
     public static let ignoreBlockedInGroupsKey = "neko_ignore_blocked_in_groups"
     public static let blockedPeerIdsKey = "neko_blocked_peer_ids"
+    public static let disableGreetingStickerKey = "neko_disable_greeting_sticker"
+    public static let hideTimeOnStickersKey = "neko_hide_time_on_stickers"
+    public static let chatIdFormatBotApiKey = "neko_chat_id_format_bot_api"
+    public static let repeatMessageActionKey = "neko_repeat_message_action"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -276,5 +280,44 @@ public final class NekoSettings {
         var current = self.blockedPeerIds
         current.remove(id)
         self.blockedPeerIds = current
+    }
+    
+    public var disableGreetingSticker: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.disableGreetingStickerKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.disableGreetingStickerKey)
+        }
+    }
+    
+    public var hideTimeOnStickers: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.hideTimeOnStickersKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.hideTimeOnStickersKey)
+        }
+    }
+    
+    public var chatIdFormatBotApi: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.chatIdFormatBotApiKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.chatIdFormatBotApiKey)
+        }
+    }
+    
+    public var repeatMessageAction: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.repeatMessageActionKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.repeatMessageActionKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.repeatMessageActionKey)
+        }
     }
 }

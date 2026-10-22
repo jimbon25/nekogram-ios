@@ -1063,7 +1063,7 @@ public class ChatMessageStickerItemNode: ChatMessageItemView {
                     
                     animation.animator.updateFrame(layer: strongSelf.dateAndStatusNode.layer, frame: dateAndStatusFrame, completion: nil)
                     dateAndStatusApply(animation)
-                    if case .customChatContents = item.associatedData.subject {
+                    if (case .customChatContents = item.associatedData.subject) || UserDefaults.standard.bool(forKey: "neko_hide_time_on_stickers") {
                         strongSelf.dateAndStatusNode.isHidden = true
                     }
                     

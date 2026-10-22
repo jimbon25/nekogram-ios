@@ -182,9 +182,15 @@ public final class ChatEmptyNodeGreetingChatContent: ASDisplayNode, ChatEmptyNod
         let previousCustomStickerFile = self.currentCustomStickerFile
         self.currentCustomStickerFile = customStickerFile
         
+        let isGreetingDisabled = UserDefaults.standard.bool(forKey: "neko_disable_greeting_sticker")
+        
         var stickerSize: CGSize
         let inset: CGFloat
-        if size.width == 320.0 {
+        if isGreetingDisabled {
+            stickerSize = CGSize.zero
+            inset = 15.0
+            self.stickerNode.isHidden = true
+        } else if size.width == 320.0 {
             stickerSize = CGSize(width: 106.0, height: 106.0)
             inset = 8.0
         } else  {
@@ -192,11 +198,14 @@ public final class ChatEmptyNodeGreetingChatContent: ASDisplayNode, ChatEmptyNod
             inset = 15.0
         }
         
-        if let customStickerFile, let dimensions = customStickerFile.dimensions?.cgSize {
+        if !isGreetingDisabled, let customStickerFile, let dimensions = customStickerFile.dimensions?.cgSize {
             stickerSize = dimensions.aspectFitted(stickerSize)
         }
         
-        if let item = self.stickerItem, previousCustomStickerFile == customStickerFile {
+        if isGreetingDisabled {
+            self.didSetupSticker = true
+            self.stickerNode.isHidden = true
+        } else if let item = self.stickerItem, previousCustomStickerFile == customStickerFile {
             self.stickerNode.updateLayout(item: item, size: stickerSize, isVisible: true, synchronousLoads: true)
         } else if !self.didSetupSticker || previousCustomStickerFile != customStickerFile {
             let sticker: Signal<TelegramMediaFile?, NoError>
@@ -270,7 +279,7 @@ public final class ChatEmptyNodeGreetingChatContent: ASDisplayNode, ChatEmptyNod
         
         let insets = UIEdgeInsets(top: inset, left: inset, bottom: inset, right: inset)
         let titleSpacing: CGFloat = 5.0
-        let stickerSpacing: CGFloat = 5.0
+        let stickerSpacing: CGFloat = isGreetingDisabled ? 0.0 : 5.0
         
         var contentWidth: CGFloat = 220.0
         var contentHeight: CGFloat = 0.0
@@ -280,7 +289,7 @@ public final class ChatEmptyNodeGreetingChatContent: ASDisplayNode, ChatEmptyNod
         
         contentWidth = max(contentWidth, max(titleSize.width, textSize.width))
         
-        contentHeight += titleSize.height + titleSpacing + textSize.height + stickerSpacing + stickerSize.height
+        contentHeight += titleSize.height + titleSpacing + textSize.height + stickerSpacing + (isGreetingDisabled ? 0.0 : stickerSize.height)
         
         let contentRect = CGRect(origin: CGPoint(x: insets.left, y: insets.top), size: CGSize(width: contentWidth, height: contentHeight))
         
@@ -290,8 +299,13 @@ public final class ChatEmptyNodeGreetingChatContent: ASDisplayNode, ChatEmptyNod
         let textFrame = CGRect(origin: CGPoint(x: contentRect.minX + floor((contentRect.width - textSize.width) / 2.0), y: titleFrame.maxY + titleSpacing), size: textSize)
         transition.updateFrame(node: self.textNode, frame: textFrame)
         
-        let stickerFrame = CGRect(origin: CGPoint(x: contentRect.minX + floor((contentRect.width - stickerSize.width) / 2.0), y: textFrame.maxY + stickerSpacing), size: stickerSize)
-        transition.updateFrame(node: self.stickerNode, frame: stickerFrame)
+        if isGreetingDisabled {
+            self.stickerNode.isHidden = true
+            transition.updateFrame(node: self.stickerNode, frame: CGRect.zero)
+        } else {
+            let stickerFrame = CGRect(origin: CGPoint(x: contentRect.minX + floor((contentRect.width - stickerSize.width) / 2.0), y: textFrame.maxY + stickerSpacing), size: stickerSize)
+            transition.updateFrame(node: self.stickerNode, frame: stickerFrame)
+        }
         
         return contentRect.insetBy(dx: -insets.left, dy: -insets.top).size
     }

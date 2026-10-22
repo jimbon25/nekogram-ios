@@ -227,10 +227,11 @@ func infoItems(
         if NekoSettings.shared.showIdAndDc {
             let ItemTelegramId = 3099
             let idText = "\(user.id.id._internalGetInt64Value())"
+            let idLabel = NekoSettings.shared.chatIdFormatBotApi ? "Bot API ID" : "Telegram ID"
             items[currentPeerInfoSection]!.append(
                 PeerInfoScreenLabeledValueItem(
                     id: ItemTelegramId,
-                    label: "Telegram ID",
+                    label: idLabel,
                     text: idText,
                     textColor: .accent,
                     action: { _, _ in
@@ -685,11 +686,13 @@ func infoItems(
             }
             if NekoSettings.shared.showIdAndDc {
                 let ItemTelegramId = 999
-                let idText = "\(channel.id.id._internalGetInt64Value())"
+                let rawId = channel.id.id._internalGetInt64Value()
+                let idText = NekoSettings.shared.chatIdFormatBotApi ? "-100\(rawId)" : "\(rawId)"
+                let idLabel = NekoSettings.shared.chatIdFormatBotApi ? "Bot API ID" : "Telegram ID"
                 items[currentPeerInfoSection]!.append(
                     PeerInfoScreenLabeledValueItem(
                         id: ItemTelegramId,
-                        label: "Telegram ID",
+                        label: idLabel,
                         text: idText,
                         textColor: .accent,
                         action: { _, _ in

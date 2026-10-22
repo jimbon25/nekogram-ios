@@ -30,6 +30,10 @@ private struct NekoSettingsState: Equatable {
     var hideAllChatsTab: Bool
     var silenceNonContacts: Bool
     var ignoreBlockedInGroups: Bool
+    var chatIdFormatBotApi: Bool
+    var repeatMessageAction: Bool
+    var disableGreetingSticker: Bool
+    var hideTimeOnStickers: Bool
     
     init() {
         self.formatTimeWithSeconds = NekoSettings.shared.formatTimeWithSeconds
@@ -52,6 +56,10 @@ private struct NekoSettingsState: Equatable {
         self.hideAllChatsTab = NekoSettings.shared.hideAllChatsTab
         self.silenceNonContacts = NekoSettings.shared.silenceNonContacts
         self.ignoreBlockedInGroups = NekoSettings.shared.ignoreBlockedInGroups
+        self.chatIdFormatBotApi = NekoSettings.shared.chatIdFormatBotApi
+        self.repeatMessageAction = NekoSettings.shared.repeatMessageAction
+        self.disableGreetingSticker = NekoSettings.shared.disableGreetingSticker
+        self.hideTimeOnStickers = NekoSettings.shared.hideTimeOnStickers
     }
 }
 
@@ -75,6 +83,11 @@ private final class NekoSettingsControllerArguments {
     let toggleHideAllChatsTab: (Bool) -> Void
     let toggleSilenceNonContacts: (Bool) -> Void
     let toggleIgnoreBlockedInGroups: (Bool) -> Void
+    let toggleChatIdFormatBotApi: (Bool) -> Void
+    let toggleRepeatMessageAction: (Bool) -> Void
+    let toggleDisableGreetingSticker: (Bool) -> Void
+    let toggleHideTimeOnStickers: (Bool) -> Void
+    let openNameOrderMenu: () -> Void
     let openDoubleTapAction: () -> Void
     let openUrl: (String) -> Void
     
@@ -98,6 +111,11 @@ private final class NekoSettingsControllerArguments {
         toggleHideAllChatsTab: @escaping (Bool) -> Void,
         toggleSilenceNonContacts: @escaping (Bool) -> Void,
         toggleIgnoreBlockedInGroups: @escaping (Bool) -> Void,
+        toggleChatIdFormatBotApi: @escaping (Bool) -> Void,
+        toggleRepeatMessageAction: @escaping (Bool) -> Void,
+        toggleDisableGreetingSticker: @escaping (Bool) -> Void,
+        toggleHideTimeOnStickers: @escaping (Bool) -> Void,
+        openNameOrderMenu: @escaping () -> Void,
         openDoubleTapAction: @escaping () -> Void,
         openUrl: @escaping (String) -> Void
     ) {
@@ -120,6 +138,11 @@ private final class NekoSettingsControllerArguments {
         self.toggleHideAllChatsTab = toggleHideAllChatsTab
         self.toggleSilenceNonContacts = toggleSilenceNonContacts
         self.toggleIgnoreBlockedInGroups = toggleIgnoreBlockedInGroups
+        self.toggleChatIdFormatBotApi = toggleChatIdFormatBotApi
+        self.toggleRepeatMessageAction = toggleRepeatMessageAction
+        self.toggleDisableGreetingSticker = toggleDisableGreetingSticker
+        self.toggleHideTimeOnStickers = toggleHideTimeOnStickers
+        self.openNameOrderMenu = openNameOrderMenu
         self.openDoubleTapAction = openDoubleTapAction
         self.openUrl = openUrl
     }
@@ -135,8 +158,12 @@ private enum NekoSettingsSection: Int32 {
 
 private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case generalHeader
+    case nameOrder(PresentationPersonNameOrder)
+    case nameOrderFooter
     case showIdAndDc(Bool)
     case showIdAndDcFooter
+    case chatIdFormatBotApi(Bool)
+    case chatIdFormatBotApiFooter
     
     case privacyHeader
     case suppressTyping(Bool)
@@ -165,6 +192,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case chatHeader
     case noQuoteForward(Bool)
     case noQuoteForwardFooter
+    case repeatMessageAction(Bool)
+    case repeatMessageActionFooter
+    case disableGreetingSticker(Bool)
+    case disableGreetingStickerFooter
+    case hideTimeOnStickers(Bool)
+    case hideTimeOnStickersFooter
     case disableJumpToNextChannel(Bool)
     case disableJumpToNextChannelFooter
     case confirmSendVoice(Bool)
@@ -191,13 +224,13 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     
     var section: ItemListSectionId {
         switch self {
-        case .generalHeader, .showIdAndDc, .showIdAndDcFooter:
+        case .generalHeader, .nameOrder, .nameOrderFooter, .showIdAndDc, .showIdAndDcFooter, .chatIdFormatBotApi, .chatIdFormatBotApiFooter:
             return NekoSettingsSection.general.rawValue
         case .privacyHeader, .suppressTyping, .suppressTypingFooter, .silenceNonContacts, .silenceNonContactsFooter, .ignoreBlockedInGroups, .ignoreBlockedInGroupsFooter, .hidePhoneNumber, .hidePhoneNumberFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter:
             return NekoSettingsSection.privacy.rawValue
         case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter:
             return NekoSettingsSection.appearance.rawValue
-        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter:
+        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter:
             return NekoSettingsSection.chat.rawValue
         case .aboutHeader, .aboutVersion, .aboutUpstream, .aboutSourceCode, .aboutInspiration, .aboutFooter:
             return NekoSettingsSection.about.rawValue
@@ -207,55 +240,69 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     var stableId: Int32 {
         switch self {
         case .generalHeader: return 0
-        case .showIdAndDc: return 1
-        case .showIdAndDcFooter: return 2
-        case .privacyHeader: return 3
-        case .suppressTyping: return 4
-        case .suppressTypingFooter: return 5
-        case .silenceNonContacts: return 6
-        case .silenceNonContactsFooter: return 7
-        case .ignoreBlockedInGroups: return 8
-        case .ignoreBlockedInGroupsFooter: return 9
-        case .hidePhoneNumber: return 10
-        case .hidePhoneNumberFooter: return 11
-        case .askBeforeCall: return 12
-        case .askBeforeCallFooter: return 13
-        case .ignoreRestrictions: return 14
-        case .ignoreRestrictionsFooter: return 15
-        case .appearanceHeader: return 16
-        case .formatWithSeconds: return 17
-        case .formatWithSecondsFooter: return 18
-        case .hideStories: return 19
-        case .hideStoriesFooter: return 20
-        case .hideAllChatsTab: return 21
-        case .hideAllChatsTabFooter: return 22
-        case .disableRounding: return 23
-        case .disableRoundingFooter: return 24
-        case .chatHeader: return 25
-        case .noQuoteForward: return 26
-        case .noQuoteForwardFooter: return 27
-        case .disableJumpToNextChannel: return 28
-        case .disableJumpToNextChannelFooter: return 29
-        case .confirmSendVoice: return 30
-        case .confirmSendVoiceFooter: return 31
-        case .confirmSendSticker: return 32
-        case .confirmSendStickerFooter: return 33
-        case .dismissKeyboardOnScroll: return 34
-        case .dismissKeyboardOnScrollFooter: return 35
-        case .expandRecentStickers: return 36
-        case .expandRecentStickersFooter: return 37
-        case .disableProximitySensor: return 38
-        case .disableProximitySensorFooter: return 39
-        case .showMessageDetails: return 40
-        case .showMessageDetailsFooter: return 41
-        case .doubleTapAction: return 42
-        case .doubleTapActionFooter: return 43
-        case .aboutHeader: return 44
-        case .aboutVersion: return 45
-        case .aboutUpstream: return 46
-        case .aboutSourceCode: return 47
-        case .aboutInspiration: return 48
-        case .aboutFooter: return 49
+        case .nameOrder: return 1
+        case .nameOrderFooter: return 2
+        case .showIdAndDc: return 3
+        case .showIdAndDcFooter: return 4
+        case .chatIdFormatBotApi: return 5
+        case .chatIdFormatBotApiFooter: return 6
+            
+        case .privacyHeader: return 10
+        case .suppressTyping: return 11
+        case .suppressTypingFooter: return 12
+        case .silenceNonContacts: return 13
+        case .silenceNonContactsFooter: return 14
+        case .ignoreBlockedInGroups: return 15
+        case .ignoreBlockedInGroupsFooter: return 16
+        case .hidePhoneNumber: return 17
+        case .hidePhoneNumberFooter: return 18
+        case .askBeforeCall: return 19
+        case .askBeforeCallFooter: return 20
+        case .ignoreRestrictions: return 21
+        case .ignoreRestrictionsFooter: return 22
+            
+        case .appearanceHeader: return 30
+        case .formatWithSeconds: return 31
+        case .formatWithSecondsFooter: return 32
+        case .hideStories: return 33
+        case .hideStoriesFooter: return 34
+        case .hideAllChatsTab: return 35
+        case .hideAllChatsTabFooter: return 36
+        case .disableRounding: return 37
+        case .disableRoundingFooter: return 38
+            
+        case .chatHeader: return 50
+        case .noQuoteForward: return 51
+        case .noQuoteForwardFooter: return 52
+        case .repeatMessageAction: return 53
+        case .repeatMessageActionFooter: return 54
+        case .disableGreetingSticker: return 55
+        case .disableGreetingStickerFooter: return 56
+        case .hideTimeOnStickers: return 57
+        case .hideTimeOnStickersFooter: return 58
+        case .disableJumpToNextChannel: return 59
+        case .disableJumpToNextChannelFooter: return 60
+        case .confirmSendVoice: return 61
+        case .confirmSendVoiceFooter: return 62
+        case .confirmSendSticker: return 63
+        case .confirmSendStickerFooter: return 64
+        case .dismissKeyboardOnScroll: return 65
+        case .dismissKeyboardOnScrollFooter: return 66
+        case .expandRecentStickers: return 67
+        case .expandRecentStickersFooter: return 68
+        case .disableProximitySensor: return 69
+        case .disableProximitySensorFooter: return 70
+        case .showMessageDetails: return 71
+        case .showMessageDetailsFooter: return 72
+        case .doubleTapAction: return 73
+        case .doubleTapActionFooter: return 74
+            
+        case .aboutHeader: return 80
+        case .aboutVersion: return 81
+        case .aboutUpstream: return 82
+        case .aboutSourceCode: return 83
+        case .aboutInspiration: return 84
+        case .aboutFooter: return 85
         }
     }
     
@@ -267,10 +314,19 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         switch lhs {
         case .generalHeader:
             if case .generalHeader = rhs { return true } else { return false }
+        case let .nameOrder(value):
+            if case let .nameOrder(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .nameOrderFooter:
+            if case .nameOrderFooter = rhs { return true } else { return false }
         case let .showIdAndDc(value):
             if case let .showIdAndDc(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .showIdAndDcFooter:
             if case .showIdAndDcFooter = rhs { return true } else { return false }
+        case let .chatIdFormatBotApi(value):
+            if case let .chatIdFormatBotApi(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .chatIdFormatBotApiFooter:
+            if case .chatIdFormatBotApiFooter = rhs { return true } else { return false }
+            
         case .privacyHeader:
             if case .privacyHeader = rhs { return true } else { return false }
         case let .suppressTyping(value):
@@ -297,6 +353,7 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .ignoreRestrictions(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .ignoreRestrictionsFooter:
             if case .ignoreRestrictionsFooter = rhs { return true } else { return false }
+            
         case .appearanceHeader:
             if case .appearanceHeader = rhs { return true } else { return false }
         case let .formatWithSeconds(value):
@@ -315,12 +372,25 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .disableRounding(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .disableRoundingFooter:
             if case .disableRoundingFooter = rhs { return true } else { return false }
+            
         case .chatHeader:
             if case .chatHeader = rhs { return true } else { return false }
         case let .noQuoteForward(value):
             if case let .noQuoteForward(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .noQuoteForwardFooter:
             if case .noQuoteForwardFooter = rhs { return true } else { return false }
+        case let .repeatMessageAction(value):
+            if case let .repeatMessageAction(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .repeatMessageActionFooter:
+            if case .repeatMessageActionFooter = rhs { return true } else { return false }
+        case let .disableGreetingSticker(value):
+            if case let .disableGreetingSticker(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .disableGreetingStickerFooter:
+            if case .disableGreetingStickerFooter = rhs { return true } else { return false }
+        case let .hideTimeOnStickers(value):
+            if case let .hideTimeOnStickers(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .hideTimeOnStickersFooter:
+            if case .hideTimeOnStickersFooter = rhs { return true } else { return false }
         case let .disableJumpToNextChannel(value):
             if case let .disableJumpToNextChannel(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .disableJumpToNextChannelFooter:
@@ -353,6 +423,7 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .doubleTapAction(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .doubleTapActionFooter:
             if case .doubleTapActionFooter = rhs { return true } else { return false }
+            
         case .aboutHeader:
             if case .aboutHeader = rhs { return true } else { return false }
         case let .aboutVersion(value):
@@ -375,12 +446,30 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         switch self {
         case .generalHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "UMUM" : "GENERAL", sectionId: self.section)
+        case let .nameOrder(order):
+            let orderLabel: String
+            if isId {
+                orderLabel = (order == .firstLast) ? "Nama Depan Belakang (First Last)" : "Nama Belakang Depan (Last First)"
+            } else {
+                orderLabel = (order == .firstLast) ? "First Last" : "Last First"
+            }
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Urutan Nama Kontak" : "Name Order", label: orderLabel, sectionId: self.section, style: .blocks, action: {
+                arguments.openNameOrderMenu()
+            })
+        case .nameOrderFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Pilih susunan tampilan nama pengguna dan kontak antara Nama Depan lebih dulu atau Nama Belakang." : "Choose whether contact names are displayed as First Last or Last First."), sectionId: self.section)
         case let .showIdAndDc(value):
             return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Tampilkan ID di Profil" : "Show ID in Profile", value: value, sectionId: self.section, style: .blocks, updated: { value in
                 arguments.toggleShowIdAndDc(value)
             })
         case .showIdAndDcFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan baris Telegram ID di profil pengguna dan channel dengan fitur ketuk untuk menyalin." : "Show Telegram ID row in user and channel profile details with tap to copy."), sectionId: self.section)
+        case let .chatIdFormatBotApi(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Format ID Bot API (-100...)" : "Bot API Chat ID Format", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleChatIdFormatBotApi(value)
+            })
+        case .chatIdFormatBotApiFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan ID channel dan supergrup dengan awalan -100 sesuai standar Telegram Bot API." : "Format channel and supergroup IDs with the -100 prefix conforming to Telegram Bot API standard."), sectionId: self.section)
             
         case .privacyHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "PRIVASI & KEAMANAN" : "PRIVACY & SECURITY", sectionId: self.section)
@@ -456,6 +545,24 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .noQuoteForwardFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Teruskan pesan secara langsung tanpa mencantumkan nama pengirim asli." : "Automatically forward messages without sender attribution."), sectionId: self.section)
+        case let .repeatMessageAction(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Kirim Ulang Pesan di Menu" : "Repeat Message in Menu", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleRepeatMessageAction(value)
+            })
+        case .repeatMessageActionFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tambahkan opsi Kirim Ulang di menu konteks pesan untuk menduplikasi pesan secara instan." : "Add a Repeat button in the message context menu to instantly duplicate and resend messages."), sectionId: self.section)
+        case let .disableGreetingSticker(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Matikan Stiker Sapaan" : "Disable Greeting Sticker", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleDisableGreetingSticker(value)
+            })
+        case .disableGreetingStickerFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Sembunyikan stiker animasi besar 'Say hello' di ruang obrolan baru yang masih kosong." : "Hide the large 'Say hello' animated sticker in newly opened empty chats."), sectionId: self.section)
+        case let .hideTimeOnStickers(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Sembunyikan Jam di Stiker" : "Hide Time on Stickers", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleHideTimeOnStickers(value)
+            })
+        case .hideTimeOnStickersFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Hilangkan tampilan cap waktu di sudut stiker sehingga gambar stiker tampil bersih." : "Hide the timestamp overlay on stickers for a clean, unobstructed appearance."), sectionId: self.section)
         case let .disableJumpToNextChannel(value):
             return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Nonaktifkan Lompat ke Channel Lain" : "Disable Jump to Next Channel", value: value, sectionId: self.section, style: .blocks, updated: { value in
                 arguments.toggleDisableJumpToNextChannel(value)
@@ -533,8 +640,14 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     let isId = presentationData.strings.primaryComponent.languageCode == "id"
     
     entries.append(.generalHeader)
+    entries.append(.nameOrder(presentationData.nameDisplayOrder))
+    entries.append(.nameOrderFooter)
     entries.append(.showIdAndDc(state.showIdAndDc))
     entries.append(.showIdAndDcFooter)
+    if state.showIdAndDc {
+        entries.append(.chatIdFormatBotApi(state.chatIdFormatBotApi))
+        entries.append(.chatIdFormatBotApiFooter)
+    }
     
     entries.append(.privacyHeader)
     entries.append(.suppressTyping(state.suppressTyping))
@@ -563,6 +676,12 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.chatHeader)
     entries.append(.noQuoteForward(state.noQuoteForward))
     entries.append(.noQuoteForwardFooter)
+    entries.append(.repeatMessageAction(state.repeatMessageAction))
+    entries.append(.repeatMessageActionFooter)
+    entries.append(.disableGreetingSticker(state.disableGreetingSticker))
+    entries.append(.disableGreetingStickerFooter)
+    entries.append(.hideTimeOnStickers(state.hideTimeOnStickers))
+    entries.append(.hideTimeOnStickersFooter)
     entries.append(.disableJumpToNextChannel(state.disableJumpToNextChannel))
     entries.append(.disableJumpToNextChannelFooter)
     entries.append(.confirmSendVoice(state.confirmSendVoice))
@@ -687,6 +806,54 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
         toggleIgnoreBlockedInGroups: { value in
             NekoSettings.shared.ignoreBlockedInGroups = value
             statePromise.set(NekoSettingsState())
+        },
+        toggleChatIdFormatBotApi: { value in
+            NekoSettings.shared.chatIdFormatBotApi = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleRepeatMessageAction: { value in
+            NekoSettings.shared.repeatMessageAction = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleDisableGreetingSticker: { value in
+            NekoSettings.shared.disableGreetingSticker = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleHideTimeOnStickers: { value in
+            NekoSettings.shared.hideTimeOnStickers = value
+            statePromise.set(NekoSettingsState())
+        },
+        openNameOrderMenu: {
+            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+            let isId = presentationData.strings.primaryComponent.languageCode == "id"
+            let actionSheet = ActionSheetController(presentationData: presentationData)
+            let items: [ActionSheetItem] = [
+                ActionSheetButtonItem(title: isId ? "Nama Depan Belakang (First Last)" : "First Last", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    let _ = updateContactSettingsInteractively(accountManager: context.sharedContext.accountManager, { current -> ContactSynchronizationSettings in
+                        var updated = current
+                        updated.nameDisplayOrder = .firstLast
+                        return updated
+                    }).start()
+                }),
+                ActionSheetButtonItem(title: isId ? "Nama Belakang Depan (Last First)" : "Last First", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    let _ = updateContactSettingsInteractively(accountManager: context.sharedContext.accountManager, { current -> ContactSynchronizationSettings in
+                        var updated = current
+                        updated.nameDisplayOrder = .lastFirst
+                        return updated
+                    }).start()
+                })
+            ]
+            actionSheet.setItemGroups([
+                ActionSheetItemGroup(items: items),
+                ActionSheetItemGroup(items: [
+                    ActionSheetButtonItem(title: presentationData.strings.Common_Cancel, color: .accent, font: .bold, action: { [weak actionSheet] in
+                        actionSheet?.dismissAnimated()
+                    })
+                ])
+            ])
+            presentControllerImpl?(actionSheet, nil)
         },
         openDoubleTapAction: {
             let presentationData = context.sharedContext.currentPresentationData.with { $0 }

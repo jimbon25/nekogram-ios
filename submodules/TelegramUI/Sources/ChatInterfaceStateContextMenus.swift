@@ -1971,6 +1971,20 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                         }
                     })))
                 }
+                
+                if NekoSettings.shared.repeatMessageAction {
+                    let repeatText = (chatPresentationInterfaceState.strings.baseLanguageCode == "id" || Locale.preferredLanguages.first?.hasPrefix("id") == true) ? "Kirim Ulang" : "Repeat"
+                    actions.append(.action(ContextMenuActionItem(text: repeatText, icon: { theme in
+                        return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Resend") ?? UIImage(bundleImageName: "Chat/Context Menu/Forward"), color: theme.actionSheet.primaryTextColor)
+                    }, action: { _, f in
+                        f(.dismissWithoutContent)
+                        let targetMessages = selectAll || isImage ? messages : [message]
+                        let forwardMessages: [EnqueueMessage] = targetMessages.map { msg in
+                            return .forward(source: msg.id, threadId: chatPresentationInterfaceState.chatLocation.threadId, grouping: .auto, attributes: [ForwardOptionsMessageAttribute(hideNames: true, hideCaptions: false)], correlationId: nil)
+                        }
+                        let _ = enqueueMessages(account: context.account, peerId: message.id.peerId, messages: forwardMessages).startStandalone()
+                    })))
+                }
             }
         }
         
