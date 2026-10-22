@@ -54,6 +54,11 @@ public final class NekoSettings {
     public static let toastRpcErrorsKey = "neko_toast_rpc_errors"
     public static let defaultMarkdownKey = "neko_default_markdown"
     public static let skipReadHistoryKey = "neko_skip_read_history"
+    public static let disableVoiceMessageAutoPlayKey = "neko_disable_vn_autoplay"
+    public static let showQrCodeKey = "neko_show_qr_code"
+    public static let disableAppBarShadowKey = "neko_disable_app_bar_shadow"
+    public static let showPrPrKey = "neko_show_prpr"
+    public static let hideChannelBottomButtonsKey = "neko_hide_channel_bottom_buttons"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -361,6 +366,54 @@ public final class NekoSettings {
         }
         set {
             self.defaults.set(newValue, forKey: NekoSettings.skipReadHistoryKey)
+        }
+    }
+    
+    public var disableVoiceMessageAutoPlay: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.disableVoiceMessageAutoPlayKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.disableVoiceMessageAutoPlayKey)
+        }
+    }
+    
+    public var showQrCode: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.showQrCodeKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.showQrCodeKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.showQrCodeKey)
+        }
+    }
+    
+    public var disableAppBarShadow: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.disableAppBarShadowKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.disableAppBarShadowKey)
+        }
+    }
+    
+    public var showPrPr: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.showPrPrKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.showPrPrKey)
+        }
+    }
+    
+    public var hideChannelBottomButtons: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.hideChannelBottomButtonsKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.hideChannelBottomButtonsKey)
         }
     }
 }

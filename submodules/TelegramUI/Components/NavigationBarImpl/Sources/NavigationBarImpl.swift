@@ -683,6 +683,9 @@ public final class NavigationBarImpl: ASDisplayNode, NavigationBar {
         
         self.stripeNode.isLayerBacked = true
         self.stripeNode.displaysAsynchronously = false
+        if UserDefaults.standard.bool(forKey: "neko_disable_app_bar_shadow") {
+            self.stripeNode.isHidden = true
+        }
         if case .legacy = presentationData.theme.style {
             self.addSubnode(self.stripeNode)
         }
@@ -755,7 +758,8 @@ public final class NavigationBarImpl: ASDisplayNode, NavigationBar {
     public func updateBackgroundAlpha(_ alpha: CGFloat, transition: ContainedViewLayoutTransition) {
         let alpha = max(0.0, min(1.0, alpha))
         transition.updateAlpha(node: self.backgroundNode, alpha: alpha, delay: 0.15)
-        transition.updateAlpha(node: self.stripeNode, alpha: alpha, delay: 0.15)
+        let disableShadow = UserDefaults.standard.bool(forKey: "neko_disable_app_bar_shadow")
+        transition.updateAlpha(node: self.stripeNode, alpha: disableShadow ? 0.0 : alpha, delay: 0.15)
     }
     
     public func updatePresentationData(_ presentationData: NavigationBarPresentationData, transition: ContainedViewLayoutTransition = .immediate) {
@@ -772,6 +776,11 @@ public final class NavigationBarImpl: ASDisplayNode, NavigationBar {
                 self.titleNode.accessibilityLabel = title
             }
             self.stripeNode.backgroundColor = self.presentationData.theme.separatorColor
+            if UserDefaults.standard.bool(forKey: "neko_disable_app_bar_shadow") {
+                self.stripeNode.isHidden = true
+            } else {
+                self.stripeNode.isHidden = false
+            }
             
             self.badgeNode.updateTheme(fillColor: self.presentationData.theme.buttonColor, strokeColor: self.presentationData.theme.buttonColor, textColor: self.presentationData.theme.badgeTextColor)
             
@@ -876,6 +885,9 @@ public final class NavigationBarImpl: ASDisplayNode, NavigationBar {
         }
         
         transition.updateFrame(node: self.stripeNode, frame: CGRect(x: (additionalCutout?.width ?? 0.0), y: size.height + additionalBackgroundHeight, width: size.width - (additionalCutout?.width ?? 0.0), height: UIScreenPixel))
+        if UserDefaults.standard.bool(forKey: "neko_disable_app_bar_shadow") {
+            self.stripeNode.isHidden = true
+        }
         
         let nominalHeight: CGFloat = 60.0
         

@@ -38,6 +38,11 @@ private struct NekoSettingsState: Equatable {
     var toastRpcErrors: Bool
     var defaultMarkdown: Bool
     var skipReadHistory: Bool
+    var disableVoiceMessageAutoPlay: Bool
+    var showQrCode: Bool
+    var disableAppBarShadow: Bool
+    var showPrPr: Bool
+    var hideChannelBottomButtons: Bool
     
     init() {
         self.formatTimeWithSeconds = NekoSettings.shared.formatTimeWithSeconds
@@ -68,6 +73,11 @@ private struct NekoSettingsState: Equatable {
         self.toastRpcErrors = NekoSettings.shared.toastRpcErrors
         self.defaultMarkdown = NekoSettings.shared.defaultMarkdown
         self.skipReadHistory = NekoSettings.shared.skipReadHistory
+        self.disableVoiceMessageAutoPlay = NekoSettings.shared.disableVoiceMessageAutoPlay
+        self.showQrCode = NekoSettings.shared.showQrCode
+        self.disableAppBarShadow = NekoSettings.shared.disableAppBarShadow
+        self.showPrPr = NekoSettings.shared.showPrPr
+        self.hideChannelBottomButtons = NekoSettings.shared.hideChannelBottomButtons
     }
 }
 
@@ -99,6 +109,11 @@ private final class NekoSettingsControllerArguments {
     let toggleToastRpcErrors: (Bool) -> Void
     let toggleDefaultMarkdown: (Bool) -> Void
     let toggleSkipReadHistory: (Bool) -> Void
+    let toggleDisableVoiceMessageAutoPlay: (Bool) -> Void
+    let toggleShowQrCode: (Bool) -> Void
+    let toggleDisableAppBarShadow: (Bool) -> Void
+    let toggleShowPrPr: (Bool) -> Void
+    let toggleHideChannelBottomButtons: (Bool) -> Void
     let openNameOrderMenu: () -> Void
     let openDoubleTapAction: () -> Void
     let openAppIconSettings: () -> Void
@@ -132,6 +147,11 @@ private final class NekoSettingsControllerArguments {
         toggleToastRpcErrors: @escaping (Bool) -> Void,
         toggleDefaultMarkdown: @escaping (Bool) -> Void,
         toggleSkipReadHistory: @escaping (Bool) -> Void,
+        toggleDisableVoiceMessageAutoPlay: @escaping (Bool) -> Void,
+        toggleShowQrCode: @escaping (Bool) -> Void,
+        toggleDisableAppBarShadow: @escaping (Bool) -> Void,
+        toggleShowPrPr: @escaping (Bool) -> Void,
+        toggleHideChannelBottomButtons: @escaping (Bool) -> Void,
         openNameOrderMenu: @escaping () -> Void,
         openDoubleTapAction: @escaping () -> Void,
         openAppIconSettings: @escaping () -> Void,
@@ -164,6 +184,11 @@ private final class NekoSettingsControllerArguments {
         self.toggleToastRpcErrors = toggleToastRpcErrors
         self.toggleDefaultMarkdown = toggleDefaultMarkdown
         self.toggleSkipReadHistory = toggleSkipReadHistory
+        self.toggleDisableVoiceMessageAutoPlay = toggleDisableVoiceMessageAutoPlay
+        self.toggleShowQrCode = toggleShowQrCode
+        self.toggleDisableAppBarShadow = toggleDisableAppBarShadow
+        self.toggleShowPrPr = toggleShowPrPr
+        self.toggleHideChannelBottomButtons = toggleHideChannelBottomButtons
         self.openNameOrderMenu = openNameOrderMenu
         self.openDoubleTapAction = openDoubleTapAction
         self.openAppIconSettings = openAppIconSettings
@@ -215,6 +240,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case disableRoundingFooter
     case appIcon
     case appIconFooter
+    case disableAppBarShadow(Bool)
+    case disableAppBarShadowFooter
     
     case chatHeader
     case noQuoteForward(Bool)
@@ -247,6 +274,14 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case downloadSpeedBoostFooter
     case toastRpcErrors(Bool)
     case toastRpcErrorsFooter
+    case disableVoiceMessageAutoPlay(Bool)
+    case disableVoiceMessageAutoPlayFooter
+    case showQrCode(Bool)
+    case showQrCodeFooter
+    case showPrPr(Bool)
+    case showPrPrFooter
+    case hideChannelBottomButtons(Bool)
+    case hideChannelBottomButtonsFooter
     
     case aboutHeader
     case aboutVersion(String)
@@ -261,9 +296,9 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             return NekoSettingsSection.general.rawValue
         case .privacyHeader, .suppressTyping, .suppressTypingFooter, .silenceNonContacts, .silenceNonContactsFooter, .ignoreBlockedInGroups, .ignoreBlockedInGroupsFooter, .hidePhoneNumber, .hidePhoneNumberFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter, .skipReadHistory, .skipReadHistoryFooter:
             return NekoSettingsSection.privacy.rawValue
-        case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter, .appIcon, .appIconFooter:
+        case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter, .appIcon, .appIconFooter, .disableAppBarShadow, .disableAppBarShadowFooter:
             return NekoSettingsSection.appearance.rawValue
-        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter, .defaultMarkdown, .defaultMarkdownFooter, .downloadSpeedBoost, .downloadSpeedBoostFooter, .toastRpcErrors, .toastRpcErrorsFooter:
+        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter, .defaultMarkdown, .defaultMarkdownFooter, .downloadSpeedBoost, .downloadSpeedBoostFooter, .toastRpcErrors, .toastRpcErrorsFooter, .disableVoiceMessageAutoPlay, .disableVoiceMessageAutoPlayFooter, .showQrCode, .showQrCodeFooter, .showPrPr, .showPrPrFooter, .hideChannelBottomButtons, .hideChannelBottomButtonsFooter:
             return NekoSettingsSection.chat.rawValue
         case .aboutHeader, .aboutVersion, .aboutUpstream, .aboutSourceCode, .aboutInspiration, .aboutFooter:
             return NekoSettingsSection.about.rawValue
@@ -307,6 +342,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .disableRoundingFooter: return 38
         case .appIcon: return 39
         case .appIconFooter: return 40
+        case .disableAppBarShadow: return 41
+        case .disableAppBarShadowFooter: return 42
             
         case .chatHeader: return 50
         case .noQuoteForward: return 51
@@ -339,6 +376,14 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .downloadSpeedBoostFooter: return 78
         case .toastRpcErrors: return 79
         case .toastRpcErrorsFooter: return 80
+        case .disableVoiceMessageAutoPlay: return 81
+        case .disableVoiceMessageAutoPlayFooter: return 82
+        case .showQrCode: return 83
+        case .showQrCodeFooter: return 84
+        case .showPrPr: return 85
+        case .showPrPrFooter: return 86
+        case .hideChannelBottomButtons: return 87
+        case .hideChannelBottomButtonsFooter: return 88
             
         case .aboutHeader: return 90
         case .aboutVersion: return 91
@@ -423,6 +468,10 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case .appIcon = rhs { return true } else { return false }
         case .appIconFooter:
             if case .appIconFooter = rhs { return true } else { return false }
+        case let .disableAppBarShadow(value):
+            if case let .disableAppBarShadow(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .disableAppBarShadowFooter:
+            if case .disableAppBarShadowFooter = rhs { return true } else { return false }
             
         case .chatHeader:
             if case .chatHeader = rhs { return true } else { return false }
@@ -486,6 +535,22 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .toastRpcErrors(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .toastRpcErrorsFooter:
             if case .toastRpcErrorsFooter = rhs { return true } else { return false }
+        case let .disableVoiceMessageAutoPlay(value):
+            if case let .disableVoiceMessageAutoPlay(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .disableVoiceMessageAutoPlayFooter:
+            if case .disableVoiceMessageAutoPlayFooter = rhs { return true } else { return false }
+        case let .showQrCode(value):
+            if case let .showQrCode(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .showQrCodeFooter:
+            if case .showQrCodeFooter = rhs { return true } else { return false }
+        case let .showPrPr(value):
+            if case let .showPrPr(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .showPrPrFooter:
+            if case .showPrPrFooter = rhs { return true } else { return false }
+        case let .hideChannelBottomButtons(value):
+            if case let .hideChannelBottomButtons(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .hideChannelBottomButtonsFooter:
+            if case .hideChannelBottomButtonsFooter = rhs { return true } else { return false }
             
         case .aboutHeader:
             if case .aboutHeader = rhs { return true } else { return false }
@@ -611,6 +676,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .appIconFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Pilih varian ikon aplikasi Nekogram resmi." : "Choose your preferred official Nekogram app icon."), sectionId: self.section)
+        case let .disableAppBarShadow(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Nonaktifkan Garis Pemisah Navigasi" : "Disable App Bar Separator", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleDisableAppBarShadow(value)
+            })
+        case .disableAppBarShadowFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Sembunyikan garis tipis pembatas di bawah bilah navigasi atas." : "Hide the subtle separator line below the top navigation bar."), sectionId: self.section)
             
         case .chatHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "OBROLAN" : "CHAT", sectionId: self.section)
@@ -704,6 +775,30 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .toastRpcErrorsFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan notifikasi toast saat permintaan API Telegram mengembalikan galat MTProto (misal FLOOD_WAIT)." : "Display toast notifications when Telegram API requests return MTProto RPC errors (e.g. FLOOD_WAIT)."), sectionId: self.section)
+        case let .disableVoiceMessageAutoPlay(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Nonaktifkan Putar Otomatis Pesan Suara" : "Disable Voice Message Auto-play", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleDisableVoiceMessageAutoPlay(value)
+            })
+        case .disableVoiceMessageAutoPlayFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Hentikan pemutaran berantai otomatis untuk pesan suara berikutnya." : "Do not automatically play the next voice note in chat."), sectionId: self.section)
+        case let .showQrCode(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Tampilkan Kode QR di Pesan" : "Show QR Code on Messages", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleShowQrCode(value)
+            })
+        case .showQrCodeFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan aksi pembuatan kode QR di menu konteks pesan teks atau tautan." : "Show a QR code generator action in the message context menu."), sectionId: self.section)
+        case let .showPrPr(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Tampilkan Aksi Colek (Peropero)" : "Show Peropero (prpr) Action", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleShowPrPr(value)
+            })
+        case .showPrPrFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan tombol colek cepat /prpr di menu konteks pesan anggota lain." : "Show quick /prpr mention action in the message context menu."), sectionId: self.section)
+        case let .hideChannelBottomButtons(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Sembunyikan Tombol Bawah Saluran" : "Hide Channel Bottom Buttons", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleHideChannelBottomButtons(value)
+            })
+        case .hideChannelBottomButtonsFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Sembunyikan panel bisukan/diskusi di bagian bawah saluran siaran." : "Hide the mute/discuss bar at the bottom of broadcast channels."), sectionId: self.section)
             
         case .aboutHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "TENTANG" : "ABOUT", sectionId: self.section)
@@ -769,6 +864,8 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.disableRoundingFooter)
     entries.append(.appIcon)
     entries.append(.appIconFooter)
+    entries.append(.disableAppBarShadow(state.disableAppBarShadow))
+    entries.append(.disableAppBarShadowFooter)
     
     entries.append(.chatHeader)
     entries.append(.noQuoteForward(state.noQuoteForward))
@@ -813,6 +910,14 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.downloadSpeedBoostFooter)
     entries.append(.toastRpcErrors(state.toastRpcErrors))
     entries.append(.toastRpcErrorsFooter)
+    entries.append(.disableVoiceMessageAutoPlay(state.disableVoiceMessageAutoPlay))
+    entries.append(.disableVoiceMessageAutoPlayFooter)
+    entries.append(.showQrCode(state.showQrCode))
+    entries.append(.showQrCodeFooter)
+    entries.append(.showPrPr(state.showPrPr))
+    entries.append(.showPrPrFooter)
+    entries.append(.hideChannelBottomButtons(state.hideChannelBottomButtons))
+    entries.append(.hideChannelBottomButtonsFooter)
     
     let appVersion = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "13.0"
     let buildNumber = (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) ?? ""
@@ -941,6 +1046,26 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
         },
         toggleSkipReadHistory: { value in
             NekoSettings.shared.skipReadHistory = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleDisableVoiceMessageAutoPlay: { value in
+            NekoSettings.shared.disableVoiceMessageAutoPlay = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleShowQrCode: { value in
+            NekoSettings.shared.showQrCode = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleDisableAppBarShadow: { value in
+            NekoSettings.shared.disableAppBarShadow = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleShowPrPr: { value in
+            NekoSettings.shared.showPrPr = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleHideChannelBottomButtons: { value in
+            NekoSettings.shared.hideChannelBottomButtons = value
             statePromise.set(NekoSettingsState())
         },
         openNameOrderMenu: {

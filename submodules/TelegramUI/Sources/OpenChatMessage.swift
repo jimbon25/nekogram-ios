@@ -295,7 +295,9 @@ func openChatMessageImpl(_ params: OpenChatMessageParams) -> Bool {
                     control = .seek(time)
                 }
                 if (file.isVoice || file.isInstantVideo) && params.message.tags.contains(.voiceOrInstantVideo) {
-                    if let playlistLocation = params.playlistLocation {
+                    if UserDefaults.standard.bool(forKey: "neko_disable_vn_autoplay") {
+                        location = .singleMessage(params.message.id)
+                    } else if let playlistLocation = params.playlistLocation {
                         location = playlistLocation
                     } else if params.standalone {
                         location = .recentActions(params.message)

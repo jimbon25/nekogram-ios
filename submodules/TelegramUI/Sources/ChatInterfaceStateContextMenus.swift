@@ -39,6 +39,7 @@ import ChatMessageBubbleItemNode
 import AdsInfoScreen
 import AdsReportScreen
 import WalletContext
+import QrCodeUI
  
 private struct MessageContextMenuData {
     let starStatus: Bool?
@@ -1500,6 +1501,15 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                         f(.default)
                     })))
                 }
+                
+                if !messageText.isEmpty && !isCopyProtected && NekoSettings.shared.showQrCode {
+                    actions.append(.action(ContextMenuActionItem(text: "QR Code", icon: { theme in
+                        return generateTintedImage(image: UIImage(bundleImageName: "Settings/QrIcon"), color: theme.actionSheet.primaryTextColor)
+                    }, action: { _, f in
+                        controllerInteraction.presentController(QrCodeScreen(context: context, subject: .text(text: messageText)), nil)
+                        f(.default)
+                    })))
+                }
             }
         }
         
@@ -1983,6 +1993,34 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                             return .forward(source: msg.id, threadId: chatPresentationInterfaceState.chatLocation.threadId, grouping: .auto, attributes: [ForwardOptionsMessageAttribute(hideNames: true, hideCaptions: false)], correlationId: nil)
                         }
                         let _ = enqueueMessages(account: context.account, peerId: message.id.peerId, messages: forwardMessages).startStandalone()
+                    })))
+                }
+                
+                if NekoSettings.shared.showPrPr, let author = message.author, author.id != context.account.peerId, !message.id.peerId.isReplies, message.id.peerId != context.account.peerId {
+                    let prprTitle = chatPresentationInterfaceState.strings.primaryComponent.languageCode == "id" ? "Colek (Peropero)" : "Peropero"
+                    actions.append(.action(ContextMenuActionItem(text: prprTitle, icon: { theme in
+                        return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Reply"), color: theme.actionSheet.primaryTextColor)
+                    }, action: { _, f in
+                        f(.dismissWithoutContent)
+                        let prprText: String
+                        if let addressName = author.addressName, !addressName.isEmpty {
+                            prprText = "/prpr@\(addressName)"
+                        } else {
+                            prprText = "/prpr"
+                        }
+                        let replyMessage = EnqueueMessage.message(
+                            text: prprText,
+                            attributes: [],
+                            inlineStickers: [:],
+                            mediaReference: nil,
+                            threadId: chatPresentationInterfaceState.chatLocation.threadId,
+                            replyToMessageId: EngineMessageReplySubject(messageId: message.id, quote: nil, innerSubject: nil),
+                            replyToStoryId: nil,
+                            localGroupingKey: nil,
+                            correlationId: nil,
+                            bubbleUpEmojiOrStickersets: []
+                        )
+                        let _ = enqueueMessages(account: context.account, peerId: message.id.peerId, messages: [replyMessage]).startStandalone()
                     })))
                 }
             }

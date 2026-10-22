@@ -373,6 +373,9 @@ func inputPanelForChatPresentationIntefaceState(_ chatPresentationInterfaceState
                 if chatPresentationInterfaceState.interfaceState.editMessage != nil, channel.hasPermission(.editAllMessages) {
                     displayInputTextPanel = true
                 } else if !channel.hasPermission(.sendSomething) || !isMember {
+                    if UserDefaults.standard.bool(forKey: "neko_hide_channel_bottom_buttons") {
+                        return (nil, nil)
+                    }
                     if let currentPanel = (currentPanel as? ChatChannelSubscriberInputPanelNode) ?? (currentSecondaryPanel as? ChatChannelSubscriberInputPanelNode) {
                         return (currentPanel, nil)
                     } else {
