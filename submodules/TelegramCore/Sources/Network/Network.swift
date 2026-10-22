@@ -1297,7 +1297,8 @@ public final class Network: NSObject {
                         if UserDefaults.standard.bool(forKey: "neko_toast_rpc_errors") {
                             let error = failure.error
                             let errorDescription = error.errorDescription ?? ""
-                            if !errorDescription.isEmpty && !errorDescription.hasPrefix("FILE_REFERENCE_") && errorDescription != "TL_VERIFICATION_ERROR" && error.errorCode != 500 {
+                            let isSilent = errorDescription.isEmpty || errorDescription.hasPrefix("FILE_REFERENCE_") || errorDescription.hasPrefix("WALLET_") || errorDescription == "TL_VERIFICATION_ERROR" || errorDescription == "BOT_METHOD_INVALID" || errorDescription == "TAKEOUT_REQUIRED" || errorDescription == "TAKEOUT_INVALID" || error.errorCode == 500
+                            if !isSilent {
                                 NotificationCenter.default.post(name: NSNotification.Name("NekoRpcErrorNotification"), object: nil, userInfo: ["code": error.errorCode, "text": errorDescription])
                             }
                         }
@@ -1342,7 +1343,8 @@ public final class Network: NSObject {
                         if UserDefaults.standard.bool(forKey: "neko_toast_rpc_errors") {
                             let error = failure.error
                             let errorDescription = error.errorDescription ?? ""
-                            if !errorDescription.isEmpty && !errorDescription.hasPrefix("FILE_REFERENCE_") && errorDescription != "TL_VERIFICATION_ERROR" && error.errorCode != 500 {
+                            let isSilent = errorDescription.isEmpty || errorDescription.hasPrefix("FILE_REFERENCE_") || errorDescription.hasPrefix("WALLET_") || errorDescription == "TL_VERIFICATION_ERROR" || errorDescription == "BOT_METHOD_INVALID" || errorDescription == "TAKEOUT_REQUIRED" || errorDescription == "TAKEOUT_INVALID" || error.errorCode == 500
+                            if !isSilent {
                                 NotificationCenter.default.post(name: NSNotification.Name("NekoRpcErrorNotification"), object: nil, userInfo: ["code": error.errorCode, "text": errorDescription])
                             }
                         }

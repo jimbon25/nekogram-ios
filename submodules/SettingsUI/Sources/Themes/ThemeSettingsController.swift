@@ -622,7 +622,7 @@ public func themeSettingsController(context: AccountContext, focusOnItemTag: The
     }, selectAppIcon: { icon in
         let _ = (context.engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: context.account.peerId))
         |> deliverOnMainQueue).start(next: { peer in
-            let isPremium = peer?.isPremium ?? false
+            let isPremium = true
             if icon.isPremium && !isPremium {
                 var replaceImpl: ((ViewController) -> Void)?
                 let controller = PremiumDemoScreen(context: context, subject: .appIcons, source: .other, action: {

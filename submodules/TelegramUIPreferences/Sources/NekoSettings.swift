@@ -53,6 +53,7 @@ public final class NekoSettings {
     public static let downloadSpeedBoostKey = "neko_download_speed_boost"
     public static let toastRpcErrorsKey = "neko_toast_rpc_errors"
     public static let defaultMarkdownKey = "neko_default_markdown"
+    public static let skipReadHistoryKey = "neko_skip_read_history"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -351,6 +352,15 @@ public final class NekoSettings {
         }
         set {
             self.defaults.set(newValue, forKey: NekoSettings.defaultMarkdownKey)
+        }
+    }
+    
+    public var skipReadHistory: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.skipReadHistoryKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.skipReadHistoryKey)
         }
     }
 }

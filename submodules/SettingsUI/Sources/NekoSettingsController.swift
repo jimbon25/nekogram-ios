@@ -37,6 +37,7 @@ private struct NekoSettingsState: Equatable {
     var downloadSpeedBoost: Bool
     var toastRpcErrors: Bool
     var defaultMarkdown: Bool
+    var skipReadHistory: Bool
     
     init() {
         self.formatTimeWithSeconds = NekoSettings.shared.formatTimeWithSeconds
@@ -66,6 +67,7 @@ private struct NekoSettingsState: Equatable {
         self.downloadSpeedBoost = NekoSettings.shared.downloadSpeedBoost
         self.toastRpcErrors = NekoSettings.shared.toastRpcErrors
         self.defaultMarkdown = NekoSettings.shared.defaultMarkdown
+        self.skipReadHistory = NekoSettings.shared.skipReadHistory
     }
 }
 
@@ -96,8 +98,10 @@ private final class NekoSettingsControllerArguments {
     let toggleDownloadSpeedBoost: (Bool) -> Void
     let toggleToastRpcErrors: (Bool) -> Void
     let toggleDefaultMarkdown: (Bool) -> Void
+    let toggleSkipReadHistory: (Bool) -> Void
     let openNameOrderMenu: () -> Void
     let openDoubleTapAction: () -> Void
+    let openAppIconSettings: () -> Void
     let openUrl: (String) -> Void
     
     init(
@@ -127,8 +131,10 @@ private final class NekoSettingsControllerArguments {
         toggleDownloadSpeedBoost: @escaping (Bool) -> Void,
         toggleToastRpcErrors: @escaping (Bool) -> Void,
         toggleDefaultMarkdown: @escaping (Bool) -> Void,
+        toggleSkipReadHistory: @escaping (Bool) -> Void,
         openNameOrderMenu: @escaping () -> Void,
         openDoubleTapAction: @escaping () -> Void,
+        openAppIconSettings: @escaping () -> Void,
         openUrl: @escaping (String) -> Void
     ) {
         self.toggleFormatWithSeconds = toggleFormatWithSeconds
@@ -157,8 +163,10 @@ private final class NekoSettingsControllerArguments {
         self.toggleDownloadSpeedBoost = toggleDownloadSpeedBoost
         self.toggleToastRpcErrors = toggleToastRpcErrors
         self.toggleDefaultMarkdown = toggleDefaultMarkdown
+        self.toggleSkipReadHistory = toggleSkipReadHistory
         self.openNameOrderMenu = openNameOrderMenu
         self.openDoubleTapAction = openDoubleTapAction
+        self.openAppIconSettings = openAppIconSettings
         self.openUrl = openUrl
     }
 }
@@ -193,6 +201,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case askBeforeCallFooter
     case ignoreRestrictions(Bool)
     case ignoreRestrictionsFooter
+    case skipReadHistory(Bool)
+    case skipReadHistoryFooter
     
     case appearanceHeader
     case formatWithSeconds(Bool)
@@ -203,6 +213,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case hideAllChatsTabFooter
     case disableRounding(Bool)
     case disableRoundingFooter
+    case appIcon
+    case appIconFooter
     
     case chatHeader
     case noQuoteForward(Bool)
@@ -247,9 +259,9 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         switch self {
         case .generalHeader, .nameOrder, .nameOrderFooter, .showIdAndDc, .showIdAndDcFooter, .chatIdFormatBotApi, .chatIdFormatBotApiFooter:
             return NekoSettingsSection.general.rawValue
-        case .privacyHeader, .suppressTyping, .suppressTypingFooter, .silenceNonContacts, .silenceNonContactsFooter, .ignoreBlockedInGroups, .ignoreBlockedInGroupsFooter, .hidePhoneNumber, .hidePhoneNumberFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter:
+        case .privacyHeader, .suppressTyping, .suppressTypingFooter, .silenceNonContacts, .silenceNonContactsFooter, .ignoreBlockedInGroups, .ignoreBlockedInGroupsFooter, .hidePhoneNumber, .hidePhoneNumberFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter, .skipReadHistory, .skipReadHistoryFooter:
             return NekoSettingsSection.privacy.rawValue
-        case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter:
+        case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter, .appIcon, .appIconFooter:
             return NekoSettingsSection.appearance.rawValue
         case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter, .defaultMarkdown, .defaultMarkdownFooter, .downloadSpeedBoost, .downloadSpeedBoostFooter, .toastRpcErrors, .toastRpcErrorsFooter:
             return NekoSettingsSection.chat.rawValue
@@ -281,6 +293,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .askBeforeCallFooter: return 20
         case .ignoreRestrictions: return 21
         case .ignoreRestrictionsFooter: return 22
+        case .skipReadHistory: return 23
+        case .skipReadHistoryFooter: return 24
             
         case .appearanceHeader: return 30
         case .formatWithSeconds: return 31
@@ -291,6 +305,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .hideAllChatsTabFooter: return 36
         case .disableRounding: return 37
         case .disableRoundingFooter: return 38
+        case .appIcon: return 39
+        case .appIconFooter: return 40
             
         case .chatHeader: return 50
         case .noQuoteForward: return 51
@@ -380,6 +396,10 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .ignoreRestrictions(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .ignoreRestrictionsFooter:
             if case .ignoreRestrictionsFooter = rhs { return true } else { return false }
+        case let .skipReadHistory(value):
+            if case let .skipReadHistory(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .skipReadHistoryFooter:
+            if case .skipReadHistoryFooter = rhs { return true } else { return false }
             
         case .appearanceHeader:
             if case .appearanceHeader = rhs { return true } else { return false }
@@ -399,6 +419,10 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .disableRounding(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .disableRoundingFooter:
             if case .disableRoundingFooter = rhs { return true } else { return false }
+        case .appIcon:
+            if case .appIcon = rhs { return true } else { return false }
+        case .appIconFooter:
+            if case .appIconFooter = rhs { return true } else { return false }
             
         case .chatHeader:
             if case .chatHeader = rhs { return true } else { return false }
@@ -548,6 +572,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .ignoreRestrictionsFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Bypass pembatasan konten regional dan batasan platform Apple pada channel serta grup." : "Bypass regional and Apple platform content restrictions on channels and groups."), sectionId: self.section)
+        case let .skipReadHistory(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Jangan Kirim Tanda Baca" : "Do Not Send Read Receipts", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleSkipReadHistory(value)
+            })
+        case .skipReadHistoryFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Jangan tandai pesan atau cerita sebagai telah dibaca saat membukanya." : "Do not mark messages or stories as read when opening them."), sectionId: self.section)
             
         case .appearanceHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "TAMPILAN" : "APPEARANCE", sectionId: self.section)
@@ -575,6 +605,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .disableRoundingFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan jumlah pelanggan dan penayangan secara eksak tanpa pembulatan (misal 4.777 alih-alih 4.8K)." : "Show exact numbers for views and member counts (e.g. 4777 instead of 4.8K)."), sectionId: self.section)
+        case .appIcon:
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Ikon Aplikasi" : "App Icon", label: "", sectionId: self.section, style: .blocks, disclosureStyle: .arrow, action: {
+                arguments.openAppIconSettings()
+            })
+        case .appIconFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Pilih varian ikon aplikasi Nekogram resmi." : "Choose your preferred official Nekogram app icon."), sectionId: self.section)
             
         case .chatHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "OBROLAN" : "CHAT", sectionId: self.section)
@@ -719,6 +755,8 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.askBeforeCallFooter)
     entries.append(.ignoreRestrictions(state.ignoreContentRestrictions))
     entries.append(.ignoreRestrictionsFooter)
+    entries.append(.skipReadHistory(state.skipReadHistory))
+    entries.append(.skipReadHistoryFooter)
     
     entries.append(.appearanceHeader)
     entries.append(.formatWithSeconds(state.formatTimeWithSeconds))
@@ -729,6 +767,8 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.hideAllChatsTabFooter)
     entries.append(.disableRounding(state.disableNumberRounding))
     entries.append(.disableRoundingFooter)
+    entries.append(.appIcon)
+    entries.append(.appIconFooter)
     
     entries.append(.chatHeader)
     entries.append(.noQuoteForward(state.noQuoteForward))
@@ -792,6 +832,7 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
     let statePromise = ValuePromise(NekoSettingsState(), ignoreRepeated: true)
     
     var presentControllerImpl: ((ViewController, Any?) -> Void)?
+    var pushControllerImpl: ((ViewController) -> Void)?
     
     let arguments = NekoSettingsControllerArguments(
         toggleFormatWithSeconds: { value in
@@ -898,6 +939,10 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
             NekoSettings.shared.defaultMarkdown = value
             statePromise.set(NekoSettingsState())
         },
+        toggleSkipReadHistory: { value in
+            NekoSettings.shared.skipReadHistory = value
+            statePromise.set(NekoSettingsState())
+        },
         openNameOrderMenu: {
             let presentationData = context.sharedContext.currentPresentationData.with { $0 }
             let isId = presentationData.strings.primaryComponent.languageCode == "id"
@@ -963,6 +1008,9 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
             ])
             presentControllerImpl?(actionSheet, nil)
         },
+        openAppIconSettings: {
+            pushControllerImpl?(themeSettingsController(context: context, focusOnItemTag: ThemeSettingsEntryTag.icon))
+        },
         openUrl: { url in
             context.sharedContext.applicationBindings.openUrl(url)
         }
@@ -999,6 +1047,9 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
     let controller = ItemListController(context: context, state: signal)
     presentControllerImpl = { [weak controller] c, a in
         controller?.present(c, in: .window(.root))
+    }
+    pushControllerImpl = { [weak controller] c in
+        controller?.push(c)
     }
     
     return controller
