@@ -148,7 +148,7 @@ public final class TelegramRootController: NavigationController, TelegramRootCon
                 let isId = strongSelf.presentationData.strings.primaryComponent.languageCode == "id"
                 let title = isId ? "Galat RPC \(code)" : "RPC Error \(code)"
                 let undoController = UndoOverlayController(presentationData: strongSelf.presentationData, content: .info(title: title, text: text, timeout: 3.5, customUndoText: nil), elevatedLayout: false, position: .bottom, animateInAsReplacement: true, action: { _ in return false })
-                strongSelf.present(undoController, in: .window(.root))
+                strongSelf.presentOverlay(controller: undoController, inGlobal: true, blockInteraction: false)
             }
         }
     }
