@@ -182,9 +182,10 @@ private final class SheetContent: CombinedComponent {
             case .proxy:
                 titleString = ""
                 textString = strings.SocksProxySetup_ShareQRCodeInfo
-            case .text:
+            case let .text(text):
                 titleString = "QR Code"
-                textString = ""
+                let preview = text.count > 60 ? String(text.prefix(60)) + "..." : text
+                textString = preview
             default:
                 titleString = ""
                 textString = ""
@@ -527,8 +528,10 @@ public final class QrCodeScreen: ViewControllerComponentContainer {
         
         var ecl: String {
             switch self {
-            case .peer, .invite, .chatFolder, .proxy, .text:
+            case .peer, .invite, .chatFolder, .proxy:
                 return "Q"
+            case .text:
+                return "M"
             }
         }
 
@@ -649,12 +652,24 @@ private final class QrCodeComponent: Component {
             self.state = state
 
             var isProxy = false
+            var isText = false
             if case .proxy = component.subject {
                 isProxy = true
+            } else if case .text = component.subject {
+                isText = true
+            }
+
+            let qrIcon: QrCodeIcon
+            if isProxy {
+                qrIcon = .proxy
+            } else if isText {
+                qrIcon = .none
+            } else {
+                qrIcon = .cutout
             }
 
             if previousComponent?.subject != component.subject {
-                self.imageNode.setSignal(qrCode(string: component.subject.link, color: .black, backgroundColor: .white, icon: isProxy ? .proxy : .cutout, ecl: component.subject.ecl) |> beforeNext { [weak self] size, _ in
+                self.imageNode.setSignal(qrCode(string: component.subject.link, color: .black, backgroundColor: .white, icon: qrIcon, ecl: component.subject.ecl) |> beforeNext { [weak self] size, _ in
                     guard let self else {
                         return
                     }
@@ -674,7 +689,7 @@ private final class QrCodeComponent: Component {
             let imageFrame = CGRect(origin: CGPoint(x: (size.width - imageSize.width) / 2.0, y: (size.height - imageSize.height) / 2.0), size: imageSize)
             self.imageNode.frame = imageFrame
             
-            if !isProxy, let qrCodeSize = self.qrCodeSize {
+            if !isProxy && !isText, let qrCodeSize = self.qrCodeSize {
                 let (_, cutoutFrame, _) = qrCodeCutout(size: qrCodeSize, dimensions: imageSize, scale: nil)
                 
                 let _ = self.icon.update(

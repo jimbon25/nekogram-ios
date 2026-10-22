@@ -54,7 +54,8 @@ public func qrCodeCutout(size: Int, dimensions: CGSize, scale: CGFloat?) -> (Int
 
 public func qrCode(string: String, color: UIColor, backgroundColor: UIColor? = nil, icon: QrCodeIcon, ecl: String = "M", onlyMarkers: Bool = false) -> Signal<(Int, (TransformImageArguments) -> DrawingContext?), NoError> {
     return Signal<(Data, Int, Int), NoError> { subscriber in
-        if let data = string.data(using: .isoLatin1, allowLossyConversion: false), let filter = CIFilter(name: "CIQRCodeGenerator") {
+        let messageData = string.data(using: .utf8) ?? string.data(using: .isoLatin1, allowLossyConversion: true)
+        if let data = messageData, let filter = CIFilter(name: "CIQRCodeGenerator") {
             filter.setValue(data, forKey: "inputMessage")
             filter.setValue(ecl, forKey: "inputCorrectionLevel")
             
