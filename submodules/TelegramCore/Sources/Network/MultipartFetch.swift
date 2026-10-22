@@ -575,7 +575,11 @@ private final class MultipartFetchManager {
         if isStory {
             self.defaultPartSize = 512 * 1024
             if let size = size, size > self.defaultPartSize {
-                self.parallelParts = 4
+                if UserDefaults.standard.bool(forKey: "neko_download_speed_boost") {
+                    self.parallelParts = 8
+                } else {
+                    self.parallelParts = 4
+                }
             } else {
                 self.parallelParts = 1
             }
@@ -585,7 +589,11 @@ private final class MultipartFetchManager {
                 self.parallelParts = 4 * 4
             } else {
                 self.defaultPartSize = 512 * 1024
-                self.parallelParts = 8
+                if UserDefaults.standard.bool(forKey: "neko_download_speed_boost") {
+                    self.parallelParts = 16
+                } else {
+                    self.parallelParts = 8
+                }
             }
         } else {
             self.parallelParts = 1

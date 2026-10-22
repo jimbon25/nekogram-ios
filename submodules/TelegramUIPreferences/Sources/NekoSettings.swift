@@ -50,6 +50,9 @@ public final class NekoSettings {
     public static let hideTimeOnStickersKey = "neko_hide_time_on_stickers"
     public static let chatIdFormatBotApiKey = "neko_chat_id_format_bot_api"
     public static let repeatMessageActionKey = "neko_repeat_message_action"
+    public static let downloadSpeedBoostKey = "neko_download_speed_boost"
+    public static let toastRpcErrorsKey = "neko_toast_rpc_errors"
+    public static let defaultMarkdownKey = "neko_default_markdown"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -318,6 +321,36 @@ public final class NekoSettings {
         }
         set {
             self.defaults.set(newValue, forKey: NekoSettings.repeatMessageActionKey)
+        }
+    }
+    
+    public var downloadSpeedBoost: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.downloadSpeedBoostKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.downloadSpeedBoostKey)
+        }
+    }
+    
+    public var toastRpcErrors: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.toastRpcErrorsKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.toastRpcErrorsKey)
+        }
+    }
+    
+    public var defaultMarkdown: Bool {
+        get {
+            if self.defaults.object(forKey: NekoSettings.defaultMarkdownKey) == nil {
+                return true
+            }
+            return self.defaults.bool(forKey: NekoSettings.defaultMarkdownKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.defaultMarkdownKey)
         }
     }
 }

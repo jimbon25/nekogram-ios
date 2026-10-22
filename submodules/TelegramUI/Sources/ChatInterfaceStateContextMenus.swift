@@ -1973,7 +1973,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                 }
                 
                 if NekoSettings.shared.repeatMessageAction {
-                    let repeatText = (chatPresentationInterfaceState.strings.baseLanguageCode == "id" || Locale.preferredLanguages.first?.hasPrefix("id") == true) ? "Kirim Ulang" : "Repeat"
+                    let repeatText = chatPresentationInterfaceState.strings.primaryComponent.languageCode == "id" ? "Kirim Ulang" : "Repeat"
                     actions.append(.action(ContextMenuActionItem(text: repeatText, icon: { theme in
                         return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Resend") ?? UIImage(bundleImageName: "Chat/Context Menu/Forward"), color: theme.actionSheet.primaryTextColor)
                     }, action: { _, f in

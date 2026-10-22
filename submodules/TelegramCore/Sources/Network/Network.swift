@@ -1294,6 +1294,13 @@ public final class Network: NSObject {
                             subscriber.putError(MTRpcError(errorCode: 500, errorDescription: "TL_VERIFICATION_ERROR"))
                         }
                     case let .failure(failure):
+                        if UserDefaults.standard.bool(forKey: "neko_toast_rpc_errors") {
+                            let error = failure.error
+                            let errorDescription = error.errorDescription ?? ""
+                            if !errorDescription.isEmpty && !errorDescription.hasPrefix("FILE_REFERENCE_") && errorDescription != "TL_VERIFICATION_ERROR" && error.errorCode != 500 {
+                                NotificationCenter.default.post(name: NSNotification.Name("NekoRpcErrorNotification"), object: nil, userInfo: ["code": error.errorCode, "text": errorDescription])
+                            }
+                        }
                         subscriber.putError(failure.error)
                     }
                 }
@@ -1332,6 +1339,13 @@ public final class Network: NSObject {
                             subscriber.putError(MTRpcError(errorCode: 500, errorDescription: "TL_VERIFICATION_ERROR"))
                         }
                     case let .failure(failure):
+                        if UserDefaults.standard.bool(forKey: "neko_toast_rpc_errors") {
+                            let error = failure.error
+                            let errorDescription = error.errorDescription ?? ""
+                            if !errorDescription.isEmpty && !errorDescription.hasPrefix("FILE_REFERENCE_") && errorDescription != "TL_VERIFICATION_ERROR" && error.errorCode != 500 {
+                                NotificationCenter.default.post(name: NSNotification.Name("NekoRpcErrorNotification"), object: nil, userInfo: ["code": error.errorCode, "text": errorDescription])
+                            }
+                        }
                         subscriber.putError(failure.error)
                     }
                 }

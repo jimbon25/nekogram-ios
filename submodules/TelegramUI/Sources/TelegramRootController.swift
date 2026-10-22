@@ -30,6 +30,7 @@ import PeerInfoScreen
 import PeerInfoStoryGridScreen
 import ShareWithPeersScreen
 import ChatEmptyNode
+import UndoUI
 
 private class DetailsChatPlaceholderNode: ASDisplayNode, NavigationDetailsPlaceholderNode {
     private var presentationData: PresentationData
@@ -88,6 +89,7 @@ public final class TelegramRootController: NavigationController, TelegramRootCon
     
     private var applicationInFocusDisposable: Disposable?
     private var storyUploadEventsDisposable: Disposable?
+    private var rpcErrorObserver: Any?
     
     override public var minimizedContainer: MinimizedContainer? {
         didSet {
@@ -135,6 +137,20 @@ public final class TelegramRootController: NavigationController, TelegramRootCon
                 moveStorySource(engine: self.context.engine, peerId: self.context.account.peerId, from: Int64(stableId), to: Int64(id))
             })
         }
+        
+        self.rpcErrorObserver = NotificationCenter.default.addObserver(forName: NSNotification.Name("NekoRpcErrorNotification"), object: nil, queue: OperationQueue.main) { [weak self] notification in
+            guard let strongSelf = self, UserDefaults.standard.bool(forKey: "neko_toast_rpc_errors") else {
+                return
+            }
+            let code = (notification.userInfo?["code"] as? Int32) ?? 0
+            let text = (notification.userInfo?["text"] as? String) ?? ""
+            if !text.isEmpty {
+                let isId = strongSelf.presentationData.strings.primaryComponent.languageCode == "id"
+                let title = isId ? "Galat RPC \(code)" : "RPC Error \(code)"
+                let undoController = UndoOverlayController(presentationData: strongSelf.presentationData, content: .info(title: title, text: text, timeout: 3.5, customUndoText: nil), elevatedLayout: false, position: .bottom, animateInAsReplacement: true, action: { _ in return false })
+                strongSelf.present(undoController, in: .window(.root))
+            }
+        }
     }
     
     required public init(coder aDecoder: NSCoder) {
@@ -142,6 +158,9 @@ public final class TelegramRootController: NavigationController, TelegramRootCon
     }
     
     deinit {
+        if let rpcErrorObserver = self.rpcErrorObserver {
+            NotificationCenter.default.removeObserver(rpcErrorObserver)
+        }
         self.permissionsDisposable?.dispose()
         self.presentationDataDisposable?.dispose()
         self.applicationInFocusDisposable?.dispose()

@@ -1178,6 +1178,9 @@ private let markdownRegexFormat = "(^|\\s|\\n)(````?)([\\s\\S]+?)(````?)([\\s\\n
 private let markdownRegex = try? NSRegularExpression(pattern: markdownRegexFormat, options: [.caseInsensitive, .anchorsMatchLines])
 
 public func convertMarkdownToAttributes(_ text: NSAttributedString) -> NSAttributedString {
+    if UserDefaults.standard.object(forKey: "neko_default_markdown") != nil && !UserDefaults.standard.bool(forKey: "neko_default_markdown") {
+        return text
+    }
     var string = text.string as NSString
     
     var offsetRanges:[(NSRange, Int)] = []

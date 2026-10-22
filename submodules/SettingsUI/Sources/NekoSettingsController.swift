@@ -34,6 +34,9 @@ private struct NekoSettingsState: Equatable {
     var repeatMessageAction: Bool
     var disableGreetingSticker: Bool
     var hideTimeOnStickers: Bool
+    var downloadSpeedBoost: Bool
+    var toastRpcErrors: Bool
+    var defaultMarkdown: Bool
     
     init() {
         self.formatTimeWithSeconds = NekoSettings.shared.formatTimeWithSeconds
@@ -60,6 +63,9 @@ private struct NekoSettingsState: Equatable {
         self.repeatMessageAction = NekoSettings.shared.repeatMessageAction
         self.disableGreetingSticker = NekoSettings.shared.disableGreetingSticker
         self.hideTimeOnStickers = NekoSettings.shared.hideTimeOnStickers
+        self.downloadSpeedBoost = NekoSettings.shared.downloadSpeedBoost
+        self.toastRpcErrors = NekoSettings.shared.toastRpcErrors
+        self.defaultMarkdown = NekoSettings.shared.defaultMarkdown
     }
 }
 
@@ -87,6 +93,9 @@ private final class NekoSettingsControllerArguments {
     let toggleRepeatMessageAction: (Bool) -> Void
     let toggleDisableGreetingSticker: (Bool) -> Void
     let toggleHideTimeOnStickers: (Bool) -> Void
+    let toggleDownloadSpeedBoost: (Bool) -> Void
+    let toggleToastRpcErrors: (Bool) -> Void
+    let toggleDefaultMarkdown: (Bool) -> Void
     let openNameOrderMenu: () -> Void
     let openDoubleTapAction: () -> Void
     let openUrl: (String) -> Void
@@ -115,6 +124,9 @@ private final class NekoSettingsControllerArguments {
         toggleRepeatMessageAction: @escaping (Bool) -> Void,
         toggleDisableGreetingSticker: @escaping (Bool) -> Void,
         toggleHideTimeOnStickers: @escaping (Bool) -> Void,
+        toggleDownloadSpeedBoost: @escaping (Bool) -> Void,
+        toggleToastRpcErrors: @escaping (Bool) -> Void,
+        toggleDefaultMarkdown: @escaping (Bool) -> Void,
         openNameOrderMenu: @escaping () -> Void,
         openDoubleTapAction: @escaping () -> Void,
         openUrl: @escaping (String) -> Void
@@ -142,6 +154,9 @@ private final class NekoSettingsControllerArguments {
         self.toggleRepeatMessageAction = toggleRepeatMessageAction
         self.toggleDisableGreetingSticker = toggleDisableGreetingSticker
         self.toggleHideTimeOnStickers = toggleHideTimeOnStickers
+        self.toggleDownloadSpeedBoost = toggleDownloadSpeedBoost
+        self.toggleToastRpcErrors = toggleToastRpcErrors
+        self.toggleDefaultMarkdown = toggleDefaultMarkdown
         self.openNameOrderMenu = openNameOrderMenu
         self.openDoubleTapAction = openDoubleTapAction
         self.openUrl = openUrl
@@ -214,6 +229,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case showMessageDetailsFooter
     case doubleTapAction(String)
     case doubleTapActionFooter
+    case defaultMarkdown(Bool)
+    case defaultMarkdownFooter
+    case downloadSpeedBoost(Bool)
+    case downloadSpeedBoostFooter
+    case toastRpcErrors(Bool)
+    case toastRpcErrorsFooter
     
     case aboutHeader
     case aboutVersion(String)
@@ -230,7 +251,7 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             return NekoSettingsSection.privacy.rawValue
         case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter:
             return NekoSettingsSection.appearance.rawValue
-        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter:
+        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter, .defaultMarkdown, .defaultMarkdownFooter, .downloadSpeedBoost, .downloadSpeedBoostFooter, .toastRpcErrors, .toastRpcErrorsFooter:
             return NekoSettingsSection.chat.rawValue
         case .aboutHeader, .aboutVersion, .aboutUpstream, .aboutSourceCode, .aboutInspiration, .aboutFooter:
             return NekoSettingsSection.about.rawValue
@@ -296,13 +317,19 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .showMessageDetailsFooter: return 72
         case .doubleTapAction: return 73
         case .doubleTapActionFooter: return 74
+        case .defaultMarkdown: return 75
+        case .defaultMarkdownFooter: return 76
+        case .downloadSpeedBoost: return 77
+        case .downloadSpeedBoostFooter: return 78
+        case .toastRpcErrors: return 79
+        case .toastRpcErrorsFooter: return 80
             
-        case .aboutHeader: return 80
-        case .aboutVersion: return 81
-        case .aboutUpstream: return 82
-        case .aboutSourceCode: return 83
-        case .aboutInspiration: return 84
-        case .aboutFooter: return 85
+        case .aboutHeader: return 90
+        case .aboutVersion: return 91
+        case .aboutUpstream: return 92
+        case .aboutSourceCode: return 93
+        case .aboutInspiration: return 94
+        case .aboutFooter: return 95
         }
     }
     
@@ -423,6 +450,18 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .doubleTapAction(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .doubleTapActionFooter:
             if case .doubleTapActionFooter = rhs { return true } else { return false }
+        case let .defaultMarkdown(value):
+            if case let .defaultMarkdown(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .defaultMarkdownFooter:
+            if case .defaultMarkdownFooter = rhs { return true } else { return false }
+        case let .downloadSpeedBoost(value):
+            if case let .downloadSpeedBoost(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .downloadSpeedBoostFooter:
+            if case .downloadSpeedBoostFooter = rhs { return true } else { return false }
+        case let .toastRpcErrors(value):
+            if case let .toastRpcErrors(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .toastRpcErrorsFooter:
+            if case .toastRpcErrorsFooter = rhs { return true } else { return false }
             
         case .aboutHeader:
             if case .aboutHeader = rhs { return true } else { return false }
@@ -611,6 +650,24 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .doubleTapActionFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Pilih tindakan yang dilakukan saat mengetuk dua kali balon pesan." : "Choose the action performed when double tapping a message bubble."), sectionId: self.section)
+        case let .defaultMarkdown(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Format Markdown Otomatis" : "Markdown by Default", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleDefaultMarkdown(value)
+            })
+        case .defaultMarkdownFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Otomatis format **tebal**, __miring__, dan `kode` saat mengirim pesan." : "Automatically format **bold**, __italic__, and `code` when sending messages."), sectionId: self.section)
+        case let .downloadSpeedBoost(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Akselerasi Unduhan" : "Download Speed Boost", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleDownloadSpeedBoost(value)
+            })
+        case .downloadSpeedBoostFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Percepat unduhan media dan berkas besar dengan melipatgandakan koneksi paralel MTProto." : "Accelerate media and large file downloads by doubling parallel MTProto chunk connections."), sectionId: self.section)
+        case let .toastRpcErrors(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Tampilkan Galat RPC" : "Toast on RPC Errors", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleToastRpcErrors(value)
+            })
+        case .toastRpcErrorsFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan notifikasi toast saat permintaan API Telegram mengembalikan galat MTProto (misal FLOOD_WAIT)." : "Display toast notifications when Telegram API requests return MTProto RPC errors (e.g. FLOOD_WAIT)."), sectionId: self.section)
             
         case .aboutHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "TENTANG" : "ABOUT", sectionId: self.section)
@@ -710,6 +767,12 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     }
     entries.append(.doubleTapAction(doubleTapLabel))
     entries.append(.doubleTapActionFooter)
+    entries.append(.defaultMarkdown(state.defaultMarkdown))
+    entries.append(.defaultMarkdownFooter)
+    entries.append(.downloadSpeedBoost(state.downloadSpeedBoost))
+    entries.append(.downloadSpeedBoostFooter)
+    entries.append(.toastRpcErrors(state.toastRpcErrors))
+    entries.append(.toastRpcErrorsFooter)
     
     let appVersion = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "13.0"
     let buildNumber = (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) ?? ""
@@ -821,6 +884,18 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
         },
         toggleHideTimeOnStickers: { value in
             NekoSettings.shared.hideTimeOnStickers = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleDownloadSpeedBoost: { value in
+            NekoSettings.shared.downloadSpeedBoost = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleToastRpcErrors: { value in
+            NekoSettings.shared.toastRpcErrors = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleDefaultMarkdown: { value in
+            NekoSettings.shared.defaultMarkdown = value
             statePromise.set(NekoSettingsState())
         },
         openNameOrderMenu: {
