@@ -43,6 +43,10 @@ private struct NekoSettingsState: Equatable {
     var disableAppBarShadow: Bool
     var showPrPr: Bool
     var hideChannelBottomButtons: Bool
+    var tryOpenInstantView: Bool
+    var tabTitleType: Int
+    var translationProvider: Int
+    var miniSenderAvatar: Bool
     
     init() {
         self.formatTimeWithSeconds = NekoSettings.shared.formatTimeWithSeconds
@@ -78,6 +82,10 @@ private struct NekoSettingsState: Equatable {
         self.disableAppBarShadow = NekoSettings.shared.disableAppBarShadow
         self.showPrPr = NekoSettings.shared.showPrPr
         self.hideChannelBottomButtons = NekoSettings.shared.hideChannelBottomButtons
+        self.tryOpenInstantView = NekoSettings.shared.tryOpenInstantView
+        self.tabTitleType = NekoSettings.shared.tabTitleType
+        self.translationProvider = NekoSettings.shared.translationProvider
+        self.miniSenderAvatar = NekoSettings.shared.miniSenderAvatar
     }
 }
 
@@ -114,6 +122,10 @@ private final class NekoSettingsControllerArguments {
     let toggleDisableAppBarShadow: (Bool) -> Void
     let toggleShowPrPr: (Bool) -> Void
     let toggleHideChannelBottomButtons: (Bool) -> Void
+    let toggleTryOpenInstantView: (Bool) -> Void
+    let openTabTitleTypeMenu: () -> Void
+    let openTranslationProviderMenu: () -> Void
+    let toggleMiniSenderAvatar: (Bool) -> Void
     let openNameOrderMenu: () -> Void
     let openDoubleTapAction: () -> Void
     let openAppIconSettings: () -> Void
@@ -152,6 +164,10 @@ private final class NekoSettingsControllerArguments {
         toggleDisableAppBarShadow: @escaping (Bool) -> Void,
         toggleShowPrPr: @escaping (Bool) -> Void,
         toggleHideChannelBottomButtons: @escaping (Bool) -> Void,
+        toggleTryOpenInstantView: @escaping (Bool) -> Void,
+        openTabTitleTypeMenu: @escaping () -> Void,
+        openTranslationProviderMenu: @escaping () -> Void,
+        toggleMiniSenderAvatar: @escaping (Bool) -> Void,
         openNameOrderMenu: @escaping () -> Void,
         openDoubleTapAction: @escaping () -> Void,
         openAppIconSettings: @escaping () -> Void,
@@ -189,6 +205,10 @@ private final class NekoSettingsControllerArguments {
         self.toggleDisableAppBarShadow = toggleDisableAppBarShadow
         self.toggleShowPrPr = toggleShowPrPr
         self.toggleHideChannelBottomButtons = toggleHideChannelBottomButtons
+        self.toggleTryOpenInstantView = toggleTryOpenInstantView
+        self.openTabTitleTypeMenu = openTabTitleTypeMenu
+        self.openTranslationProviderMenu = openTranslationProviderMenu
+        self.toggleMiniSenderAvatar = toggleMiniSenderAvatar
         self.openNameOrderMenu = openNameOrderMenu
         self.openDoubleTapAction = openDoubleTapAction
         self.openAppIconSettings = openAppIconSettings
@@ -242,6 +262,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case appIconFooter
     case disableAppBarShadow(Bool)
     case disableAppBarShadowFooter
+    case tabTitleType(String)
+    case tabTitleTypeFooter
     
     case chatHeader
     case noQuoteForward(Bool)
@@ -282,6 +304,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
     case showPrPrFooter
     case hideChannelBottomButtons(Bool)
     case hideChannelBottomButtonsFooter
+    case tryOpenInstantView(Bool)
+    case tryOpenInstantViewFooter
+    case translationProvider(String)
+    case translationProviderFooter
+    case miniSenderAvatar(Bool)
+    case miniSenderAvatarFooter
     
     case aboutHeader
     case aboutVersion(String)
@@ -296,9 +324,9 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             return NekoSettingsSection.general.rawValue
         case .privacyHeader, .suppressTyping, .suppressTypingFooter, .silenceNonContacts, .silenceNonContactsFooter, .ignoreBlockedInGroups, .ignoreBlockedInGroupsFooter, .hidePhoneNumber, .hidePhoneNumberFooter, .askBeforeCall, .askBeforeCallFooter, .ignoreRestrictions, .ignoreRestrictionsFooter, .skipReadHistory, .skipReadHistoryFooter:
             return NekoSettingsSection.privacy.rawValue
-        case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter, .appIcon, .appIconFooter, .disableAppBarShadow, .disableAppBarShadowFooter:
+        case .appearanceHeader, .formatWithSeconds, .formatWithSecondsFooter, .hideStories, .hideStoriesFooter, .hideAllChatsTab, .hideAllChatsTabFooter, .disableRounding, .disableRoundingFooter, .appIcon, .appIconFooter, .disableAppBarShadow, .disableAppBarShadowFooter, .tabTitleType, .tabTitleTypeFooter:
             return NekoSettingsSection.appearance.rawValue
-        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter, .defaultMarkdown, .defaultMarkdownFooter, .downloadSpeedBoost, .downloadSpeedBoostFooter, .toastRpcErrors, .toastRpcErrorsFooter, .disableVoiceMessageAutoPlay, .disableVoiceMessageAutoPlayFooter, .showQrCode, .showQrCodeFooter, .showPrPr, .showPrPrFooter, .hideChannelBottomButtons, .hideChannelBottomButtonsFooter:
+        case .chatHeader, .noQuoteForward, .noQuoteForwardFooter, .repeatMessageAction, .repeatMessageActionFooter, .disableGreetingSticker, .disableGreetingStickerFooter, .hideTimeOnStickers, .hideTimeOnStickersFooter, .disableJumpToNextChannel, .disableJumpToNextChannelFooter, .confirmSendVoice, .confirmSendVoiceFooter, .confirmSendSticker, .confirmSendStickerFooter, .dismissKeyboardOnScroll, .dismissKeyboardOnScrollFooter, .expandRecentStickers, .expandRecentStickersFooter, .disableProximitySensor, .disableProximitySensorFooter, .showMessageDetails, .showMessageDetailsFooter, .doubleTapAction, .doubleTapActionFooter, .defaultMarkdown, .defaultMarkdownFooter, .downloadSpeedBoost, .downloadSpeedBoostFooter, .toastRpcErrors, .toastRpcErrorsFooter, .disableVoiceMessageAutoPlay, .disableVoiceMessageAutoPlayFooter, .showQrCode, .showQrCodeFooter, .showPrPr, .showPrPrFooter, .hideChannelBottomButtons, .hideChannelBottomButtonsFooter, .tryOpenInstantView, .tryOpenInstantViewFooter, .translationProvider, .translationProviderFooter, .miniSenderAvatar, .miniSenderAvatarFooter:
             return NekoSettingsSection.chat.rawValue
         case .aboutHeader, .aboutVersion, .aboutUpstream, .aboutSourceCode, .aboutInspiration, .aboutFooter:
             return NekoSettingsSection.about.rawValue
@@ -344,6 +372,8 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .appIconFooter: return 40
         case .disableAppBarShadow: return 41
         case .disableAppBarShadowFooter: return 42
+        case .tabTitleType: return 43
+        case .tabTitleTypeFooter: return 44
             
         case .chatHeader: return 50
         case .noQuoteForward: return 51
@@ -384,13 +414,19 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
         case .showPrPrFooter: return 86
         case .hideChannelBottomButtons: return 87
         case .hideChannelBottomButtonsFooter: return 88
+        case .tryOpenInstantView: return 89
+        case .tryOpenInstantViewFooter: return 90
+        case .translationProvider: return 91
+        case .translationProviderFooter: return 92
+        case .miniSenderAvatar: return 93
+        case .miniSenderAvatarFooter: return 94
             
-        case .aboutHeader: return 90
-        case .aboutVersion: return 91
-        case .aboutUpstream: return 92
-        case .aboutSourceCode: return 93
-        case .aboutInspiration: return 94
-        case .aboutFooter: return 95
+        case .aboutHeader: return 100
+        case .aboutVersion: return 101
+        case .aboutUpstream: return 102
+        case .aboutSourceCode: return 103
+        case .aboutInspiration: return 104
+        case .aboutFooter: return 105
         }
     }
     
@@ -472,6 +508,10 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .disableAppBarShadow(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .disableAppBarShadowFooter:
             if case .disableAppBarShadowFooter = rhs { return true } else { return false }
+        case let .tabTitleType(value):
+            if case let .tabTitleType(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .tabTitleTypeFooter:
+            if case .tabTitleTypeFooter = rhs { return true } else { return false }
             
         case .chatHeader:
             if case .chatHeader = rhs { return true } else { return false }
@@ -551,6 +591,18 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             if case let .hideChannelBottomButtons(rhsValue) = rhs, value == rhsValue { return true } else { return false }
         case .hideChannelBottomButtonsFooter:
             if case .hideChannelBottomButtonsFooter = rhs { return true } else { return false }
+        case let .tryOpenInstantView(value):
+            if case let .tryOpenInstantView(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .tryOpenInstantViewFooter:
+            if case .tryOpenInstantViewFooter = rhs { return true } else { return false }
+        case let .translationProvider(value):
+            if case let .translationProvider(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .translationProviderFooter:
+            if case .translationProviderFooter = rhs { return true } else { return false }
+        case let .miniSenderAvatar(value):
+            if case let .miniSenderAvatar(rhsValue) = rhs, value == rhsValue { return true } else { return false }
+        case .miniSenderAvatarFooter:
+            if case .miniSenderAvatarFooter = rhs { return true } else { return false }
             
         case .aboutHeader:
             if case .aboutHeader = rhs { return true } else { return false }
@@ -682,6 +734,12 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .disableAppBarShadowFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Sembunyikan garis tipis pembatas di bawah bilah navigasi atas." : "Hide the subtle separator line below the top navigation bar."), sectionId: self.section)
+        case let .tabTitleType(label):
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Gaya Judul Tab Folder" : "Tabs Title Type", label: label, sectionId: self.section, style: .blocks, action: {
+                arguments.openTabTitleTypeMenu()
+            })
+        case .tabTitleTypeFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Pilih apakah tab folder obrolan menampilkan judul saja, ikon emoji saja, atau keduanya." : "Choose whether folder tabs display titles only, emoji icons only, or both."), sectionId: self.section)
             
         case .chatHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "OBROLAN" : "CHAT", sectionId: self.section)
@@ -799,6 +857,24 @@ private enum NekoSettingsControllerEntry: ItemListNodeEntry {
             })
         case .hideChannelBottomButtonsFooter:
             return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Sembunyikan panel bisukan/diskusi di bagian bawah saluran siaran." : "Hide the mute/discuss bar at the bottom of broadcast channels."), sectionId: self.section)
+        case let .tryOpenInstantView(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Coba Buka Semua Tautan di Instant View" : "Try Open All Links in Instant View", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleTryOpenInstantView(value)
+            })
+        case .tryOpenInstantViewFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Otomatis mencoba merender pratinjau Instant View untuk setiap tautan web eksternal sebelum membuka browser." : "Attempt to load Telegram Instant View for all external web links before opening in browser."), sectionId: self.section)
+        case let .translationProvider(label):
+            return ItemListDisclosureItem(presentationData: presentationData, title: isId ? "Penyedia Terjemahan Pesan" : "Translation Provider", label: label, sectionId: self.section, style: .blocks, action: {
+                arguments.openTranslationProviderMenu()
+            })
+        case .translationProviderFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Pilih mesin terjemahan saat menggunakan tombol Terjemahkan pada menu pesan (Bawaan Telegram, Google Translate, atau DeepL)." : "Choose translation engine for the message context menu (Built-in Telegram, Google Translate, or DeepL)."), sectionId: self.section)
+        case let .miniSenderAvatar(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: isId ? "Avatar Mini Pengirim di Daftar Chat" : "Mini Sender Avatar in Chat List", value: value, sectionId: self.section, style: .blocks, updated: { value in
+                arguments.toggleMiniSenderAvatar(value)
+            })
+        case .miniSenderAvatarFooter:
+            return ItemListTextItem(presentationData: presentationData, text: .plain(isId ? "Tampilkan foto profil kecil di sebelah nama pengirim pesan terakhir pada obrolan grup di daftar chat." : "Display a miniature sender avatar next to the author name in group dialogs."), sectionId: self.section)
             
         case .aboutHeader:
             return ItemListSectionHeaderItem(presentationData: presentationData, text: isId ? "TENTANG" : "ABOUT", sectionId: self.section)
@@ -867,6 +943,23 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.disableAppBarShadow(state.disableAppBarShadow))
     entries.append(.disableAppBarShadowFooter)
     
+    let tabTitleTypeLabel: String
+    if isId {
+        switch state.tabTitleType {
+        case 1: tabTitleTypeLabel = "Ikon Saja"
+        case 2: tabTitleTypeLabel = "Ikon dan Judul"
+        default: tabTitleTypeLabel = "Judul Saja"
+        }
+    } else {
+        switch state.tabTitleType {
+        case 1: tabTitleTypeLabel = "Icons Only"
+        case 2: tabTitleTypeLabel = "Icons and Titles"
+        default: tabTitleTypeLabel = "Titles Only"
+        }
+    }
+    entries.append(.tabTitleType(tabTitleTypeLabel))
+    entries.append(.tabTitleTypeFooter)
+    
     entries.append(.chatHeader)
     entries.append(.noQuoteForward(state.noQuoteForward))
     entries.append(.noQuoteForwardFooter)
@@ -918,6 +1011,27 @@ private func nekoSettingsControllerEntries(presentationData: PresentationData, s
     entries.append(.showPrPrFooter)
     entries.append(.hideChannelBottomButtons(state.hideChannelBottomButtons))
     entries.append(.hideChannelBottomButtonsFooter)
+    entries.append(.tryOpenInstantView(state.tryOpenInstantView))
+    entries.append(.tryOpenInstantViewFooter)
+    
+    let translationProviderLabel: String
+    if isId {
+        switch state.translationProvider {
+        case 1: translationProviderLabel = "Google Translate"
+        case 2: translationProviderLabel = "DeepL"
+        default: translationProviderLabel = "Bawaan Telegram"
+        }
+    } else {
+        switch state.translationProvider {
+        case 1: translationProviderLabel = "Google Translate"
+        case 2: translationProviderLabel = "DeepL"
+        default: translationProviderLabel = "Telegram Built-in"
+        }
+    }
+    entries.append(.translationProvider(translationProviderLabel))
+    entries.append(.translationProviderFooter)
+    entries.append(.miniSenderAvatar(state.miniSenderAvatar))
+    entries.append(.miniSenderAvatarFooter)
     
     let appVersion = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "13.0"
     let buildNumber = (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) ?? ""
@@ -1066,6 +1180,76 @@ public func nekoSettingsController(context: AccountContext) -> ViewController {
         },
         toggleHideChannelBottomButtons: { value in
             NekoSettings.shared.hideChannelBottomButtons = value
+            statePromise.set(NekoSettingsState())
+        },
+        toggleTryOpenInstantView: { value in
+            NekoSettings.shared.tryOpenInstantView = value
+            statePromise.set(NekoSettingsState())
+        },
+        openTabTitleTypeMenu: {
+            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+            let isId = presentationData.strings.primaryComponent.languageCode == "id"
+            let actionSheet = ActionSheetController(presentationData: presentationData)
+            let items: [ActionSheetItem] = [
+                ActionSheetButtonItem(title: isId ? "Judul Saja" : "Titles Only", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    NekoSettings.shared.tabTitleType = 0
+                    statePromise.set(NekoSettingsState())
+                }),
+                ActionSheetButtonItem(title: isId ? "Ikon Saja" : "Icons Only", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    NekoSettings.shared.tabTitleType = 1
+                    statePromise.set(NekoSettingsState())
+                }),
+                ActionSheetButtonItem(title: isId ? "Ikon dan Judul" : "Icons and Titles", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    NekoSettings.shared.tabTitleType = 2
+                    statePromise.set(NekoSettingsState())
+                })
+            ]
+            actionSheet.setItemGroups([
+                ActionSheetItemGroup(items: items),
+                ActionSheetItemGroup(items: [
+                    ActionSheetButtonItem(title: presentationData.strings.Common_Cancel, color: .accent, font: .bold, action: { [weak actionSheet] in
+                        actionSheet?.dismissAnimated()
+                    })
+                ])
+            ])
+            presentControllerImpl?(actionSheet, nil)
+        },
+        openTranslationProviderMenu: {
+            let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+            let isId = presentationData.strings.primaryComponent.languageCode == "id"
+            let actionSheet = ActionSheetController(presentationData: presentationData)
+            let items: [ActionSheetItem] = [
+                ActionSheetButtonItem(title: isId ? "Bawaan Telegram" : "Telegram Built-in", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    NekoSettings.shared.translationProvider = 0
+                    statePromise.set(NekoSettingsState())
+                }),
+                ActionSheetButtonItem(title: "Google Translate", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    NekoSettings.shared.translationProvider = 1
+                    statePromise.set(NekoSettingsState())
+                }),
+                ActionSheetButtonItem(title: "DeepL", color: .accent, action: { [weak actionSheet] in
+                    actionSheet?.dismissAnimated()
+                    NekoSettings.shared.translationProvider = 2
+                    statePromise.set(NekoSettingsState())
+                })
+            ]
+            actionSheet.setItemGroups([
+                ActionSheetItemGroup(items: items),
+                ActionSheetItemGroup(items: [
+                    ActionSheetButtonItem(title: presentationData.strings.Common_Cancel, color: .accent, font: .bold, action: { [weak actionSheet] in
+                        actionSheet?.dismissAnimated()
+                    })
+                ])
+            ])
+            presentControllerImpl?(actionSheet, nil)
+        },
+        toggleMiniSenderAvatar: { value in
+            NekoSettings.shared.miniSenderAvatar = value
             statePromise.set(NekoSettingsState())
         },
         openNameOrderMenu: {

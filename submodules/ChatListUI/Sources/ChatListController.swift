@@ -4053,8 +4053,22 @@ public class ChatListControllerImpl: TelegramBaseController, ChatListController 
                         } else {
                             filterItems.append(.all(unreadCount: 0))
                         }
-                    case let .filter(id, title, _, _):
-                        filterItems.append(.filter(id: id, text: title, unread: ChatListFilterTabEntryUnreadCount(value: unreadCount, hasUnmuted: hasUnmutedUnread)))
+                    case let .filter(id, title, emoticon, _):
+                        let tabTitleType = NekoSettings.shared.tabTitleType
+                        let effectiveTitle: ChatFolderTitle
+                        if let emoticon = emoticon, !emoticon.isEmpty {
+                            switch tabTitleType {
+                            case 1:
+                                effectiveTitle = ChatFolderTitle(text: emoticon, entities: [], enableAnimations: title.enableAnimations)
+                            case 2:
+                                effectiveTitle = ChatFolderTitle(text: "\(emoticon) \(title.text)", entities: title.entities, enableAnimations: title.enableAnimations)
+                            default:
+                                effectiveTitle = title
+                            }
+                        } else {
+                            effectiveTitle = title
+                        }
+                        filterItems.append(.filter(id: id, text: effectiveTitle, unread: ChatListFilterTabEntryUnreadCount(value: unreadCount, hasUnmuted: hasUnmutedUnread)))
                 }
             }
             

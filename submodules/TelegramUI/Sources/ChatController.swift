@@ -4483,6 +4483,19 @@ public final class ChatControllerImpl: TelegramBaseController, ChatController, G
                 }
             case .translate:
                 self.chatDisplayNode.dismissInput()
+                let translationProvider = NekoSettings.shared.translationProvider
+                if translationProvider != 0 {
+                    let targetLang = self.presentationInterfaceState.strings.primaryComponent.languageCode
+                    let encodedText = text.string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                    let urlString: String
+                    if translationProvider == 1 {
+                        urlString = "https://translate.google.com/?sl=auto&tl=\(targetLang)&text=\(encodedText)"
+                    } else {
+                        urlString = "https://www.deepl.com/translator#auto/\(targetLang)/\(encodedText)"
+                    }
+                    self.context.sharedContext.applicationBindings.openUrl(urlString)
+                    return
+                }
                 let f: () -> Void = { [weak self] in
                     Task { @MainActor in
                         guard let self else {

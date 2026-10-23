@@ -28,6 +28,7 @@ import AppBundle
 import MultilineTextComponent
 import MultilineTextWithEntitiesComponent
 import ShimmerEffect
+import TelegramUIPreferences
 import GlassBackgroundComponent
 
 public enum ChatListItemContent {
@@ -1393,6 +1394,7 @@ public class ChatListItemNode: ItemListRevealOptionsItemNode {
     private var communityAvatarBadgeBackgroundView: GlassBackgroundView?
     private var communityAvatarBadgeIconView: GlassBackgroundView.ContentImageView?
     public let avatarNode: AvatarNode
+    public var miniSenderAvatarNode: AvatarNode?
     var avatarIconView: ComponentHostView<Empty>?
     var avatarIconComponent: EmojiStatusComponent?
     var avatarVideoNode: AvatarVideoNode?
@@ -2664,12 +2666,16 @@ public class ChatListItemNode: ItemListRevealOptionsItemNode {
                 }
             }
             
+            var miniSenderAvatarPeer: EnginePeer?
             if useInlineAuthorPrefix {
                 if case let .user(author) = messages.last?.author {
                     if author.id == item.context.account.peerId {
                         inlineAuthorPrefix = item.presentationData.strings.DialogList_You
                     } else if messages.last?.id.peerId.namespace != Namespaces.Peer.CloudUser && messages.last?.id.peerId.namespace != Namespaces.Peer.SecretChat {
                         inlineAuthorPrefix = EnginePeer.user(author).compactDisplayTitle
+                        if NekoSettings.shared.miniSenderAvatar {
+                            miniSenderAvatarPeer = EnginePeer.user(author)
+                        }
                     }
                 }
             }
@@ -3824,6 +3830,9 @@ public class ChatListItemNode: ItemListRevealOptionsItemNode {
             }
             
             var textMaxWidth = rawContentWidth - badgeSize
+            if miniSenderAvatarPeer != nil {
+                textMaxWidth -= 19.0
+            }
             
             var textArrowImage: UIImage?
             if isFirstForumThreadSelectable {
@@ -4780,7 +4789,25 @@ public class ChatListItemNode: ItemListRevealOptionsItemNode {
                     
                     let authorNodeFrame = CGRect(origin: CGPoint(x: contentRect.origin.x - 1.0, y: contentRect.minY + titleLayout.size.height - 2.0), size: authorLayout)
                     strongSelf.authorNode.frame = authorNodeFrame
-                    let textNodeFrame = CGRect(origin: CGPoint(x: contentRect.origin.x - 1.0, y: contentRect.minY + titleLayout.size.height - 2.0 + (authorLayout.height.isZero ? 0.0 : (authorLayout.height - 3.0))), size: textLayout.size)
+                    var textNodeFrame = CGRect(origin: CGPoint(x: contentRect.origin.x - 1.0, y: contentRect.minY + titleLayout.size.height - 2.0 + (authorLayout.height.isZero ? 0.0 : (authorLayout.height - 3.0))), size: textLayout.size)
+                    if let miniSenderAvatarPeer = miniSenderAvatarPeer, NekoSettings.shared.miniSenderAvatar {
+                        let miniAvatarNode: AvatarNode
+                        if let current = strongSelf.miniSenderAvatarNode {
+                            miniAvatarNode = current
+                        } else {
+                            miniAvatarNode = AvatarNode(font: avatarPlaceholderFont(size: 8.0))
+                            strongSelf.miniSenderAvatarNode = miniAvatarNode
+                            strongSelf.mainContentContainerNode.addSubnode(miniAvatarNode)
+                        }
+                        let miniSize = CGSize(width: 15.0, height: 15.0)
+                        miniAvatarNode.frame = CGRect(origin: CGPoint(x: contentRect.origin.x - 1.0, y: textNodeFrame.origin.y + 2.0), size: miniSize)
+                        miniAvatarNode.updateSize(size: miniSize)
+                        miniAvatarNode.setPeer(context: item.context, theme: item.presentationData.theme, peer: miniSenderAvatarPeer, overrideImage: nil, emptyColor: item.presentationData.theme.list.mediaPlaceholderColor, clipStyle: .round, synchronousLoad: false, displayDimensions: miniSize)
+                        textNodeFrame.origin.x += 19.0
+                    } else if let miniAvatarNode = strongSelf.miniSenderAvatarNode {
+                        strongSelf.miniSenderAvatarNode = nil
+                        miniAvatarNode.removeFromSupernode()
+                    }
                     
                     if let topForumTopicRect, !isSearching {
                         let compoundHighlightingNode: LinkHighlightingNode

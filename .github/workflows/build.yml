@@ -75,6 +75,8 @@ jobs:
           rm -rf "$SLIM_DIR/Payload/Telegram.app/PlugIns"
           rm -f "$SLIM_DIR/Payload/Telegram.app/embedded.mobileprovision"
           (cd "$SLIM_DIR" && zip -qry "$SOURCE_DIR/$OUTPUT_PATH/Telegram-slim.ipa" Payload)
+          cp "$OUTPUT_PATH/Telegram.ipa" "$OUTPUT_PATH/Nekogram.ipa"
+          cp "$OUTPUT_PATH/Telegram-slim.ipa" "$OUTPUT_PATH/Nekogram-slim.ipa"
 
           # collect dsym
           mkdir -p build/DSYMs
@@ -90,9 +92,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: build-${{ env.BUILD_NUMBER }}
-          release_name: Telegram ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
+          release_name: Nekogram ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
           body: |
-            An unsigned build of Telegram for iOS ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
+            An unsigned build of Nekogram for iOS ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
           draft: false
           prerelease: false
 
@@ -103,8 +105,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/Shared/telegram-ios/build/artifacts/Telegram.ipa
-          asset_name: Telegram.ipa
+          asset_path: /Users/Shared/telegram-ios/build/artifacts/Nekogram.ipa
+          asset_name: Nekogram.ipa
           asset_content_type: application/zip
 
       - name: Upload Release Slim IPA
@@ -114,8 +116,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/Shared/telegram-ios/build/artifacts/Telegram-slim.ipa
-          asset_name: Telegram-slim.ipa
+          asset_path: /Users/Shared/telegram-ios/build/artifacts/Nekogram-slim.ipa
+          asset_name: Nekogram-slim.ipa
           asset_content_type: application/zip
 
       - name: Upload Release DSYM

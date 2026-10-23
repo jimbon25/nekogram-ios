@@ -59,6 +59,10 @@ public final class NekoSettings {
     public static let disableAppBarShadowKey = "neko_disable_app_bar_shadow"
     public static let showPrPrKey = "neko_show_prpr"
     public static let hideChannelBottomButtonsKey = "neko_hide_channel_bottom_buttons"
+    public static let tryOpenInstantViewKey = "neko_try_open_instant_view"
+    public static let tabTitleTypeKey = "neko_tab_title_type"
+    public static let translationProviderKey = "neko_translation_provider"
+    public static let miniSenderAvatarKey = "neko_mini_sender_avatar"
     
     public var formatTimeWithSeconds: Bool {
         get {
@@ -414,6 +418,42 @@ public final class NekoSettings {
         }
         set {
             self.defaults.set(newValue, forKey: NekoSettings.hideChannelBottomButtonsKey)
+        }
+    }
+    
+    public var tryOpenInstantView: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.tryOpenInstantViewKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.tryOpenInstantViewKey)
+        }
+    }
+    
+    public var tabTitleType: Int {
+        get {
+            return self.defaults.integer(forKey: NekoSettings.tabTitleTypeKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.tabTitleTypeKey)
+        }
+    }
+    
+    public var translationProvider: Int {
+        get {
+            return self.defaults.integer(forKey: NekoSettings.translationProviderKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.translationProviderKey)
+        }
+    }
+    
+    public var miniSenderAvatar: Bool {
+        get {
+            return self.defaults.bool(forKey: NekoSettings.miniSenderAvatarKey)
+        }
+        set {
+            self.defaults.set(newValue, forKey: NekoSettings.miniSenderAvatarKey)
         }
     }
 }

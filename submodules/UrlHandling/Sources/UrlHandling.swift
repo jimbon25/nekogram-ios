@@ -1722,6 +1722,12 @@ public func resolveUrlImpl(context: AccountContext, peerId: EnginePeer.Id?, url:
                     }
                 }
             }
+            if UserDefaults.standard.bool(forKey: "neko_try_open_instant_view") {
+                let lowercasedUrl = url.lowercased()
+                if lowercasedUrl.hasPrefix("http://") || lowercasedUrl.hasPrefix("https://") {
+                    return resolveInstantViewUrl(account: context.account, url: url)
+                }
+            }
             return .single(.result(.externalUrl(url)))
         }
     }
@@ -1749,7 +1755,7 @@ public func resolveInstantViewUrl(account: Account, url: String) -> Signal<Resol
                         return .single(.result(.externalUrl(url)))
                     }
                 } else {
-                    return .complete()
+                    return .single(.result(.externalUrl(url)))
                 }
             } else {
                 return .single(.result(.externalUrl(url)))
